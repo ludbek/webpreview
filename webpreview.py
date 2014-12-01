@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 import requests
 from requests.exceptions import *
 import re
+from bs4 import BeautifulSoup
 
 class EmptyURL(Exception):
     """
@@ -65,10 +66,54 @@ class PreviewBase(object):
         # its safe to assign the url and config
         self.url = url
         self.config = config
+        self._soup = BeautifulSoup(res.text)
 
 
 class GenericPreview(PreviewBase):
     """
     Extracts title, desc, img from a webpage's body instead of the meta tags.
     """
-    pass
+    def __init__(self, *args):
+        super(GenericPreview, self).__init__(*args)
+        self.title = self._get_title()
+        self.desc = self._get_desc()
+        self.img = self._get_img()
+
+    def _get_title(self):
+        """
+        Extract title from the given web page.
+        """
+        soup = self._soup
+        # if title tag is present and has text in it, return it as the title
+        if (soup.title and soup.title.text != ""):
+            return soup.title.text
+        # else if h1 tag is present and has text in it, return it as the title
+        if (soup.h1 and soup.h1.text != ""):
+            return soup.h1.text
+        # if no title, h1 return None
+        return None
+
+    def _get_desc(self):
+        """
+        Extract desc from the given web page.
+        """
+        soup = self._soup
+        # extract content preview from meta[name='description']
+        meta_desc = soup.find('meta',attrs = {"name" : "description"})
+        if(meta_desc and meta_desc['content'] !=""):
+            return meta_desc['content']
+        # else extract preview from the first <p> sibling to the first <h1>
+        first_h1 = soup.find('h1')
+        if first_h1:
+            first_p = first_h1.find_next_sibling('p')
+            if (first_p and first_p.string != ''):
+                return first_p.string
+        # else extract preview from the first <p>
+        first_p = soup.find('p')
+        if (first_p and first_p.string != ""):
+            return first_p.string
+        # else
+        return None
+
+    def _get_img(self):
+        return None
