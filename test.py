@@ -119,6 +119,15 @@ class TestGenericPreview(unittest.TestCase):
         apreview = GenericPreview("http://localhost:8000/generic-preview/h1-img.html")
         self.assertEqual(apreview.img, "http://localhost:8000/img/heck.img")
 
+    def test_title_desc_img_are_none_if_none_found(self):
+        """
+        GenericPreview: Test if title, desc and img could not be found all are assigned None.
+        """
+        apreview = GenericPreview("http://localhost:8000/generic-preview/empty.html")
+        self.assertEqual(apreview.title, None)
+        self.assertEqual(apreview.desc, None)
+        self.assertEqual(apreview.img, None)
+
 
 if __name__ == '__main__':
     unittest.main()
