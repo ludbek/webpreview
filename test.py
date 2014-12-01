@@ -1,6 +1,6 @@
 import unittest
 from webpreview import PreviewBase
-from webpreview import EmptyURL, InvalidURL
+from webpreview import EmptyURL, InvalidURL, URLNotFound, URLUnreachable
 
 class TestPreviewBase(unittest.TestCase):
     """
@@ -14,47 +14,31 @@ class TestPreviewBase(unittest.TestCase):
             PreviewBase()
         except EmptyURL as e:
             self.assertEqual(type(e), EmptyURL)
-
-    def test_catches_invalid_url(self):
-        """
-        PreviewBase: Test it catches invalid urls
-        """
-        try:
-            PreviewBase('invalidurl')
-        except InvalidURL as e:
-            self.assertEqual(InvalidURL, type(e))
-
-        try:
-            PreviewBase('ascheme://invalidurl.com')
-        except InvalidURL as e:
-            self.assertEqual(InvalidURL, type(e))
+            return
+        self.fail("Should complain about the empty URL.")
 
     def test_instance_gets_valid_url(self):
         """
         PreviewBase: Test instance gets the valid url being passed.
         """
-        aurl = "validurl.com"
+        aurl = "http://validurl.com"
         apreview = PreviewBase(aurl)
         self.assertEqual(apreview.url, aurl)
 
-    def test_allows_url_without_scheme(self):
+    def test_url_without_schema_gets_http_appended(self):
         """
-        PreviewBase: Test it allows urls without scheme.
-        e.g: example.com, www.example.com
+        PreviewBase: Test if "http://" is added URL without schema.
+        example.com to http://example.com
         """
-        aurl = 'validurl.com'
-        apreview = PreviewBase(aurl)
-        self.assertEqual(apreview.url, aurl)
-
-        aurl2 = 'www.validurl.com'
+        aurl2 = 'wikipedia.com'
         apreview2 = PreviewBase(aurl2)
-        self.assertEqual(apreview2.url, aurl2)
+        self.assertEqual(apreview2.url, "http://" + aurl2)
 
     def test_default_config_works(self):
         """
         PreviewBase: Test if no config list is passed the default config is added.
         """
-        apreview = PreviewBase("avalidurl.com")
+        apreview = PreviewBase("www.wikipedia.com")
         self.assertEqual(apreview.config, ['title', 'desc', 'img'])
 
     def test_config_is_added_to_instance(self):
@@ -62,8 +46,30 @@ class TestPreviewBase(unittest.TestCase):
         """
         PreviewBase: Test if config list is past, its added to the instance.
         """
-        apreview = PreviewBase("avalidurl.com", ['title', 'author'])
+        apreview = PreviewBase("wikipedia.com", ['title', 'author'])
         self.assertEqual(apreview.config, ['title', 'author'])
+
+    def test_dns_errors(self):
+        """
+        PreviewBase: Test if DNS errors can be caught.
+        """
+        try:
+            PreviewBase("http://thisurldoesnotexists7352356.urlz")
+        except URLUnreachable as e:
+            self.assertEqual(URLUnreachable, type(e))
+            return
+        self.fail("Should throw the DNS error.")
+
+    def test_url_exists(self):
+        """
+        PreviewBase: Test if URL exists.
+        """
+        try:
+            PreviewBase("http://en.wikipedia.org/wiki/thisdoesnotexists7")
+        except URLNotFound as e:
+            self.assertEqual(URLNotFound, type(e))
+            return
+        self.fail("Should throw the 404 error.")
 
 if __name__ == '__main__':
     unittest.main()

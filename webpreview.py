@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 import requests
+from requests.exceptions import *
 import re
 
 class EmptyURL(Exception):
@@ -8,9 +9,17 @@ class EmptyURL(Exception):
     """
     pass
 
-class InvalidURL(Exception):
+
+class URLNotFound(Exception):
     """
-    Exception for invalid URL.
+    Exception for 404 URLs.
+    """
+    pass
+
+
+class URLUnreachable(Exception):
+    """
+    Exception for 404 URLs.
     """
     pass
 
@@ -36,10 +45,30 @@ class PreviewBase(object):
         if not valid_url.match(url):
             raise InvalidURL("The URL is invalid.")
 
+        # if no schema add http as default
+        try:
+            res = requests.get(url)
+        except (ConnectionError, HTTPError, Timeout, TooManyRedirects):
+            raise URLUnreachable("The URL does not exists.")
+        except MissingSchema: # if no schema add http as default
+            url = "http://" + url
+
+        # throw URLUnreachable exception for just incase
+        try:
+            res = requests.get(url)
+        except (ConnectionError, HTTPError, Timeout, TooManyRedirects):
+            raise URLUnreachable("The URL is unreachable.")
+
+        if res.status_code == 404:
+            raise URLNotFound("The web page does not exists.")
+
         # its safe to assign the url and config
         self.url = url
         self.config = config
 
 
 class GenericPreview(PreviewBase):
+    """
+    Extracts title, desc, img from a webpage's body instead of the meta tags.
+    """
     pass
