@@ -112,6 +112,13 @@ class TestGenericPreview(unittest.TestCase):
         apreview = GenericPreview("http://localhost:8000/generic-preview/p-desc.html")
         self.assertEqual(apreview.desc, "This description is from the first p.")
 
+    def test_extracts_img(self):
+        """
+        GenericPreview: Test if url of image is returned if found in article body.
+        """
+        apreview = GenericPreview("http://localhost:8000/generic-preview/h1-img.html")
+        self.assertEqual(apreview.img, "http://localhost:8000/img/heck.img")
+
 
 if __name__ == '__main__':
     unittest.main()

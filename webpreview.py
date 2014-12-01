@@ -116,4 +116,14 @@ class GenericPreview(PreviewBase):
         return None
 
     def _get_img(self):
+        """
+        Extract preview image from the given web page.
+        """
+        soup = self._soup
+        # extract the first image which is sibling to the first h1
+        first_h1 = soup.find('h1')
+        if first_h1:
+            first_img = first_h1.find_next_sibling('img')
+            if first_img and first_img['src'] != "":
+                return first_img['src']
         return None
