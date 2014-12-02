@@ -34,20 +34,13 @@ class TestPreviewBase(unittest.TestCase):
         apreview2 = PreviewBase(aurl2)
         self.assertEqual(apreview2.url, "http://" + aurl2)
 
-    def test_default_config_works(self):
-        """
-        PreviewBase: Test if no config list is passed the default config is added.
-        """
-        apreview = PreviewBase("www.wikipedia.com")
-        self.assertEqual(apreview.config, ['title', 'description', 'image'])
-
-    def test_config_is_added_to_instance(self):
+    def test_properties_is_added_to_instance(self):
 
         """
-        PreviewBase: Test if config list is past, its added to the instance.
+        PreviewBase: Test if properties list pass, its added to the instance.
         """
         apreview = PreviewBase("wikipedia.com", ['title', 'author'])
-        self.assertEqual(apreview.config, ['title', 'author'])
+        self.assertEqual(apreview.properties, ['title', 'author'])
 
     def test_dns_errors(self):
         """
@@ -76,13 +69,19 @@ class TestGenericPreview(unittest.TestCase):
     """
     Test GenericPreview.
     """
+    def test_default_properties_works(self):
+        """
+        GenericPreview: Test if no properties list is passed the default properties is added.
+        """
+        apreview = GenericPreview("www.wikipedia.com")
+        self.assertEqual(apreview.properties, ['title', 'description', 'image'])
+
     def test_extracts_title_from_title_tag(self):
         """
         GenericPreview: Test GenericPreview returns title from title tag if present.
         """
         apreview = GenericPreview("http://localhost:8000/generic-preview/title.html")
         self.assertEqual(apreview.title, "This title is at the title tag.")
-
 
     def test_extracts_title_from_h1_tag(self):
         """

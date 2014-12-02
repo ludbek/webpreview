@@ -29,7 +29,7 @@ class PreviewBase(object):
     """
     Base for all web preview.
     """
-    def __init__(self, url = None, config = ['title', 'description', 'image']):
+    def __init__(self, url = None, properties = None):
         # if no first argument raise URL required exception
         if not url:
             raise EmptyURL("Please pass a valid URL as the first argument.")
@@ -63,9 +63,9 @@ class PreviewBase(object):
         if res.status_code == 404:
             raise URLNotFound("The web page does not exists.")
 
-        # its safe to assign the url and config
+        # its safe to assign the url and properties
         self.url = url
-        self.config = config
+        self.properties = properties
         self._soup = BeautifulSoup(res.text)
 
 
@@ -73,8 +73,8 @@ class GenericPreview(PreviewBase):
     """
     Extracts title, description, image from a webpage's body instead of the meta tags.
     """
-    def __init__(self, *args):
-        super(GenericPreview, self).__init__(*args)
+    def __init__(self, url = None, properties = ['title', 'description', 'image']):
+        super(GenericPreview, self).__init__(url, properties)
         self.title = self._get_title()
         self.description = self._get_description()
         self.image = self._get_image()
@@ -143,7 +143,7 @@ class SocialPreviewBase(PreviewBase):
 
     def _set_properties(self):
         soup = self._soup
-        for property in self.config:
+        for property in self.properties:
             property_meta = soup.find('meta', attrs = {self._target_attribute : property})
             # turn "og:title" to "title" and "og:price:amount" to price_amount
             if re.search(r":", property):
