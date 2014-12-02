@@ -129,20 +129,44 @@ class GenericPreview(PreviewBase):
         return None
 
 
-class OpenGraphPreview(PreviewBase):
+class SocialPreviewBase(PreviewBase):
     """
-    Gets OpenGraph meta properties of a webpage.
+    Abstract class for OpenGraph, TwitterCard and Google+.
     """
     def __init__(self, *args):
-        super(OpenGraphPreview, self).__init__(*args)
+        super(SocialPreviewBase, self).__init__(*args)
         self._set_properties()
+        # OpengGraph has <meta property="" content="">
+        # TwitterCard  has <meta name="" content="">
+        # Google+  has <meta itemprop="" content="">
+        # override this self._target_attribute
 
     def _set_properties(self):
         soup = self._soup
         for property in self.config:
-            property_meta = soup.find('meta', attrs = {'property': property})
+            property_meta = soup.find('meta', attrs = {self._target_attribute : property})
+            # turn "og:title" to "title" and "og:price:amount" to price_amount
             new_property =  property.split(':',1)[1].replace(':', '_')
             if property_meta and property_meta['content'] != "":
+                # dynamically attach property to instance
                 self.__dict__[new_property] = property_meta['content']
             else:
                 self.__dict__[new_property] = None
+
+
+class OpenGraphPreview(SocialPreviewBase):
+    """
+    Gets OpenGraph meta properties of a webpage.
+    """
+    def __init__(self, *args):
+        self._target_attribute =  "property"
+        super(OpenGraphPreview, self).__init__(*args)
+
+
+class TwitterCard(SocialPreviewBase):
+    """
+    Gets OpenGraph meta properties of a webpage.
+    """
+    def __init__(self, *args):
+        self._target_attribute =  "name"
+        super(TwitterCard, self).__init__(*args)

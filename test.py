@@ -1,6 +1,6 @@
 import unittest
 from webpreview import PreviewBase, GenericPreview
-from webpreview import EmptyURL, InvalidURL, URLNotFound, URLUnreachable, OpenGraphPreview
+from webpreview import EmptyURL, InvalidURL, URLNotFound, URLUnreachable, OpenGraphPreview, TwitterCard
 
 class TestPreviewBase(unittest.TestCase):
     """
@@ -148,6 +148,28 @@ class TestOpenGraph(unittest.TestCase):
         ogpreview = OpenGraphPreview("http://localhost:8000/open-graph/unavailable.html", ['og:title', 'og:price:amount'])
         self.assertEqual(ogpreview.title, None)
         self.assertEqual(ogpreview.price_amount, None)
+
+
+
+class TestTwitterCard(unittest.TestCase):
+    """
+    Test TwitterCard.
+    """
+    def test_extracts_n_assigns_properties_to_instance(self):
+        """
+        TwitterCard extracts properties from a web page and assigns corresponding property-value to its instance.
+        """
+        tc = TwitterCard("http://localhost:8000/twitter-card/available.html", ['twitter:title', 'twitter:description'])
+        self.assertEqual(tc.title, "a title")
+        self.assertEqual(tc.description, "a description")
+
+    def test_unavailable_empty_properties_get_none(self):
+        """
+        TwitterCard assigns None to properties not found in the web page.
+        """
+        tc = TwitterCard("http://localhost:8000/twitter-card/unavailable.html", ['twitter:title', 'twitter:description'])
+        self.assertEqual(tc.title, None)
+        self.assertEqual(tc.description, None)
 
 
 if __name__ == '__main__':
