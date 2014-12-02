@@ -1,6 +1,6 @@
 import unittest
 from webpreview import PreviewBase, GenericPreview
-from webpreview import EmptyURL, InvalidURL, URLNotFound, URLUnreachable, OpenGraphPreview, TwitterCard
+from webpreview import *
 
 class TestPreviewBase(unittest.TestCase):
     """
@@ -170,6 +170,27 @@ class TestTwitterCard(unittest.TestCase):
         tc = TwitterCard("http://localhost:8000/twitter-card/unavailable.html", ['twitter:title', 'twitter:description'])
         self.assertEqual(tc.title, None)
         self.assertEqual(tc.description, None)
+
+
+class TestSchema(unittest.TestCase):
+    """
+    Test Schema.
+    """
+    def test_extracts_n_assigns_properties_to_instance(self):
+        """
+        Schema extracts properties from a web page and assigns corresponding property-value to its instance.
+        """
+        s = Schema("http://localhost:8000/schema/available.html", ['name', 'camelCase'])
+        self.assertEqual(s.name, "a title")
+        self.assertEqual(s.camel_case, "camelCase changed to camel_case.")
+
+    def test_unavailable_empty_properties_get_none(self):
+        """
+        Schema assigns None to properties not found in the web page.
+        """
+        s = Schema("http://localhost:8000/schema/unavailable.html", ['name', 'description'])
+        self.assertEqual(s.name, None)
+        self.assertEqual(s.description,  None)
 
 
 if __name__ == '__main__':

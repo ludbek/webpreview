@@ -146,7 +146,15 @@ class SocialPreviewBase(PreviewBase):
         for property in self.config:
             property_meta = soup.find('meta', attrs = {self._target_attribute : property})
             # turn "og:title" to "title" and "og:price:amount" to price_amount
-            new_property =  property.split(':',1)[1].replace(':', '_')
+            if re.search(r":", property):
+                new_property =  property.split(':',1)[1].replace(':', '_')
+            # turn "camelCase" to "camel_case"
+            elif re.search(r"[A-Z]", property):
+                # regex taken from 2nd answer at http://stackoverflow.com/questions/1175208/elegant-python-function-to-convert-camelcase-to-camel-case
+                new_property = re.sub('(?!^)([A-Z]+)', r'_\1',property).lower()
+            else:
+                new_property = property
+
             if property_meta and property_meta['content'] != "":
                 # dynamically attach property to instance
                 self.__dict__[new_property] = property_meta['content']
@@ -170,3 +178,12 @@ class TwitterCard(SocialPreviewBase):
     def __init__(self, *args):
         self._target_attribute =  "name"
         super(TwitterCard, self).__init__(*args)
+
+
+class Schema(SocialPreviewBase):
+    """
+    Gets Schema meta properties from a website.
+    """
+    def __init__(self, *args):
+        self._target_attribute =  "itemprop"
+        super(Schema, self).__init__(*args)
