@@ -74,9 +74,9 @@ class PreviewBase(object):
         self.url = url
 
 
-        # its safe to assign properties
         if not properties:
             raise EmptyProperties("Please pass list of properties to be extracted.")
+        # its safe to assign properties
         self.properties = properties
         self._soup = BeautifulSoup(res.text)
 
@@ -185,7 +185,7 @@ class OpenGraph(SocialPreviewBase):
 
 class TwitterCard(SocialPreviewBase):
     """
-    Gets OpenGraph meta properties of a webpage.
+    Gets TwitterCard meta properties of a webpage.
     """
     def __init__(self, *args):
         self._target_attribute =  "name"
