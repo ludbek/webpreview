@@ -11,6 +11,13 @@ class EmptyURL(Exception):
     pass
 
 
+class EmptyProperties(Exception):
+    """
+    Exception for empty properties.
+    """
+    pass
+
+
 class URLNotFound(Exception):
     """
     Exception for 404 URLs.
@@ -63,8 +70,13 @@ class PreviewBase(object):
         if res.status_code == 404:
             raise URLNotFound("The web page does not exists.")
 
-        # its safe to assign the url and properties
+        # its safe to assign the url
         self.url = url
+
+
+        # its safe to assign properties
+        if not properties:
+            raise EmptyProperties("Please pass list of properties to be extracted.")
         self.properties = properties
         self._soup = BeautifulSoup(res.text)
 
@@ -162,13 +174,13 @@ class SocialPreviewBase(PreviewBase):
                 self.__dict__[new_property] = None
 
 
-class OpenGraphPreview(SocialPreviewBase):
+class OpenGraph(SocialPreviewBase):
     """
     Gets OpenGraph meta properties of a webpage.
     """
     def __init__(self, *args):
         self._target_attribute =  "property"
-        super(OpenGraphPreview, self).__init__(*args)
+        super(OpenGraph, self).__init__(*args)
 
 
 class TwitterCard(SocialPreviewBase):

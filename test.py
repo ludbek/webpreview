@@ -1,5 +1,4 @@
 import unittest
-from webpreview import PreviewBase, GenericPreview
 from webpreview import *
 
 class TestPreviewBase(unittest.TestCase):
@@ -22,7 +21,7 @@ class TestPreviewBase(unittest.TestCase):
         PreviewBase: Test instance gets the valid url being passed.
         """
         aurl = "http://validurl.com"
-        apreview = PreviewBase(aurl)
+        apreview = PreviewBase(aurl, ["title"])
         self.assertEqual(apreview.url, aurl)
 
     def test_url_without_schema_gets_http_appended(self):
@@ -31,13 +30,13 @@ class TestPreviewBase(unittest.TestCase):
         example.com to http://example.com
         """
         aurl2 = 'wikipedia.com'
-        apreview2 = PreviewBase(aurl2)
+        apreview2 = PreviewBase(aurl2, ['title'])
         self.assertEqual(apreview2.url, "http://" + aurl2)
 
     def test_properties_is_added_to_instance(self):
 
         """
-        PreviewBase: Test if properties list pass, its added to the instance.
+        PreviewBase: Test if passed "properties" are added to the instance.
         """
         apreview = PreviewBase("wikipedia.com", ['title', 'author'])
         self.assertEqual(apreview.properties, ['title', 'author'])
@@ -47,7 +46,7 @@ class TestPreviewBase(unittest.TestCase):
         PreviewBase: Test if DNS errors can be caught.
         """
         try:
-            PreviewBase("http://thisurldoesnotexists7352356.urlz")
+            PreviewBase("http://thisurldoesnotexists7352356.urlz", ['title'])
         except URLUnreachable as e:
             self.assertEqual(URLUnreachable, type(e))
             return
@@ -63,6 +62,18 @@ class TestPreviewBase(unittest.TestCase):
             self.assertEqual(URLNotFound, type(e))
             return
         self.fail("Should throw the 404 error.")
+
+    def test_complains_about_empty_property_list(self):
+        """
+        PreviewBase complains about empty property list.
+        """
+        try:
+            PreviewBase("http://localhost:8000")
+            PreviewBase("http://localhost:8000", [])
+        except EmptyProperties as e:
+            self.assertEqual(EmptyProperties, type(e))
+            return
+        self.fail("Should should complain about empty property list.")
 
 
 class TestGenericPreview(unittest.TestCase):
@@ -130,21 +141,21 @@ class TestGenericPreview(unittest.TestCase):
 
 class TestOpenGraph(unittest.TestCase):
     """
-    Test OpenGraphPreview.
+    Test OpenGraph.
     """
     def test_extracts_n_assigns_properties_to_instance(self):
         """
-        OpenGraphPreview extracts properties from a web page and assigns corresponding property-value to its instance.
+        OpenGraph extracts properties from a web page and assigns corresponding property-value to its instance.
         """
-        ogpreview = OpenGraphPreview("http://localhost:8000/open-graph/available.html", ['og:title', 'og:price:amount'])
+        ogpreview = OpenGraph("http://localhost:8000/open-graph/available.html", ['og:title', 'og:price:amount'])
         self.assertEqual(ogpreview.title, "a title")
         self.assertEqual(ogpreview.price_amount, "1")
 
     def test_unavailable_empty_properties_get_none(self):
         """
-        OpenGraphPreview assigns None to properties not found in the web page.
+        OpenGraph assigns None to properties not found in the web page.
         """
-        ogpreview = OpenGraphPreview("http://localhost:8000/open-graph/unavailable.html", ['og:title', 'og:price:amount'])
+        ogpreview = OpenGraph("http://localhost:8000/open-graph/unavailable.html", ['og:title', 'og:price:amount'])
         self.assertEqual(ogpreview.title, None)
         self.assertEqual(ogpreview.price_amount, None)
 
