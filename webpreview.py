@@ -29,7 +29,7 @@ class PreviewBase(object):
     """
     Base for all web preview.
     """
-    def __init__(self, url = None, config = ['title', 'desc', 'img']):
+    def __init__(self, url = None, config = ['title', 'description', 'image']):
         # if no first argument raise URL required exception
         if not url:
             raise EmptyURL("Please pass a valid URL as the first argument.")
@@ -71,13 +71,13 @@ class PreviewBase(object):
 
 class GenericPreview(PreviewBase):
     """
-    Extracts title, desc, img from a webpage's body instead of the meta tags.
+    Extracts title, description, image from a webpage's body instead of the meta tags.
     """
     def __init__(self, *args):
         super(GenericPreview, self).__init__(*args)
         self.title = self._get_title()
-        self.desc = self._get_desc()
-        self.img = self._get_img()
+        self.description = self._get_description()
+        self.image = self._get_image()
 
     def _get_title(self):
         """
@@ -93,15 +93,15 @@ class GenericPreview(PreviewBase):
         # if no title, h1 return None
         return None
 
-    def _get_desc(self):
+    def _get_description(self):
         """
-        Extract desc from the given web page.
+        Extract description from the given web page.
         """
         soup = self._soup
         # extract content preview from meta[name='description']
-        meta_desc = soup.find('meta',attrs = {"name" : "description"})
-        if(meta_desc and meta_desc['content'] !=""):
-            return meta_desc['content']
+        meta_description = soup.find('meta',attrs = {"name" : "description"})
+        if(meta_description and meta_description['content'] !=""):
+            return meta_description['content']
         # else extract preview from the first <p> sibling to the first <h1>
         first_h1 = soup.find('h1')
         if first_h1:
@@ -115,7 +115,7 @@ class GenericPreview(PreviewBase):
         # else
         return None
 
-    def _get_img(self):
+    def _get_image(self):
         """
         Extract preview image from the given web page.
         """
@@ -123,9 +123,9 @@ class GenericPreview(PreviewBase):
         # extract the first image which is sibling to the first h1
         first_h1 = soup.find('h1')
         if first_h1:
-            first_img = first_h1.find_next_sibling('img')
-            if first_img and first_img['src'] != "":
-                return first_img['src']
+            first_image = first_h1.find_next_sibling('img')
+            if first_image and first_image['src'] != "":
+                return first_image['src']
         return None
 
 

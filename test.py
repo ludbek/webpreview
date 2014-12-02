@@ -39,7 +39,7 @@ class TestPreviewBase(unittest.TestCase):
         PreviewBase: Test if no config list is passed the default config is added.
         """
         apreview = PreviewBase("www.wikipedia.com")
-        self.assertEqual(apreview.config, ['title', 'desc', 'img'])
+        self.assertEqual(apreview.config, ['title', 'description', 'image'])
 
     def test_config_is_added_to_instance(self):
 
@@ -91,42 +91,42 @@ class TestGenericPreview(unittest.TestCase):
         apreview = GenericPreview("http://localhost:8000/generic-preview/h1-title.html")
         self.assertEqual(apreview.title, "This title is from the first h1 tag.")
 
-    def test_extracts_desc_from_meta_tag(self):
+    def test_extracts_description_from_meta_tag(self):
         """
         GenericPreview: Test description is extracted from meta[name='description'] tag if present.
         """
         apreview = GenericPreview("http://localhost:8000/generic-preview/meta-desc.html")
-        self.assertEqual(apreview.desc, "This description is from the meta[name='description'].")
+        self.assertEqual(apreview.description, "This description is from the meta[name='description'].")
 
-    def test_extracts_desc_from_the_first_h1_p(self):
+    def test_extracts_description_from_the_first_h1_p(self):
         """
         GenericPreview: Test description is extracted from the first p sibling to the first h1.
         """
         apreview = GenericPreview("http://localhost:8000/generic-preview/h1-p-desc.html")
-        self.assertEqual(apreview.desc, "This description is from the first h1>p[0].")
+        self.assertEqual(apreview.description, "This description is from the first h1>p[0].")
 
-    def test_extracts_desc_from_the_first_p(self):
+    def test_extracts_description_from_the_first_p(self):
         """
         GenericPreview: Test description is extracted from the first <p>.
         """
         apreview = GenericPreview("http://localhost:8000/generic-preview/p-desc.html")
-        self.assertEqual(apreview.desc, "This description is from the first p.")
+        self.assertEqual(apreview.description, "This description is from the first p.")
 
-    def test_extracts_img(self):
+    def test_extracts_image(self):
         """
         GenericPreview: Test if url of image is returned if found in article body.
         """
         apreview = GenericPreview("http://localhost:8000/generic-preview/h1-img.html")
-        self.assertEqual(apreview.img, "http://localhost:8000/img/heck.img")
+        self.assertEqual(apreview.image, "http://localhost:8000/img/heck.jpg")
 
-    def test_title_desc_img_are_none_if_none_found(self):
+    def test_title_description_image_are_none_if_none_found(self):
         """
-        GenericPreview: Test if title, desc and img could not be found all are assigned None.
+        GenericPreview: Test if title, description and image could not be found all are assigned None.
         """
         apreview = GenericPreview("http://localhost:8000/generic-preview/empty.html")
         self.assertEqual(apreview.title, None)
-        self.assertEqual(apreview.desc, None)
-        self.assertEqual(apreview.img, None)
+        self.assertEqual(apreview.description, None)
+        self.assertEqual(apreview.image, None)
 
 
 class TestOpenGraph(unittest.TestCase):
