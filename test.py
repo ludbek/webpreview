@@ -38,7 +38,7 @@ class TestPreviewBase(unittest.TestCase):
         """
         PreviewBase: Test if passed "properties" are added to the instance.
         """
-        apreview = PreviewBase("wikipedia.com", ['title', 'author'])
+        apreview = PreviewBase("http://localhost:8000/", ['title', 'author'])
         self.assertEqual(apreview.properties, ['title', 'author'])
 
     def test_dns_errors(self):
@@ -84,7 +84,7 @@ class TestGenericPreview(unittest.TestCase):
         """
         GenericPreview: Test if no properties list is passed the default properties is added.
         """
-        apreview = GenericPreview("www.wikipedia.com")
+        apreview = GenericPreview("http://localhost:8000/")
         self.assertEqual(apreview.properties, ['title', 'description', 'image'])
 
     def test_extracts_title_from_title_tag(self):
@@ -113,7 +113,7 @@ class TestGenericPreview(unittest.TestCase):
         GenericPreview: Test description is extracted from the first p sibling to the first h1.
         """
         apreview = GenericPreview("http://localhost:8000/generic-preview/h1-p-desc.html")
-        self.assertEqual(apreview.description, "This description is from the first h1>p[0].")
+        self.assertEqual(apreview.description, "This is valid description.")
 
     def test_extracts_description_from_the_first_p(self):
         """
