@@ -57,7 +57,7 @@ class TestPreviewBase(unittest.TestCase):
         PreviewBase: Test if URL exists.
         """
         try:
-            PreviewBase("http://en.wikipedia.org/wiki/thisdoesnotexists7")
+            PreviewBase("http://localhost:8000/thisdoesnotexists7")
         except URLNotFound as e:
             self.assertEqual(URLNotFound, type(e))
             return
@@ -201,6 +201,35 @@ class TestSchema(unittest.TestCase):
         s = Schema("http://localhost:8000/schema/unavailable.html", ['name', 'description'])
         self.assertEqual(s.name, None)
         self.assertEqual(s.description,  None)
+
+
+class TestWebPreview(unittest.TestCase):
+    """
+    Test web_preview.
+    """
+    def test_extracts_title_via_openg_graph(self):
+        """
+        """
+        title, description, image = web_preview("http://localhost:8000/open-graph/available.html")
+        self.assertEqual(title, "a title")
+
+    def test_extracts_title_via_twitter_card(self):
+        """
+        """
+        title, description, image = web_preview("http://localhost:8000/twitter-card/available.html")
+        self.assertEqual(title, "a title")
+
+    def test_extracts_title_via_schema(self):
+        """
+        """
+        title, description, image = web_preview("http://localhost:8000/schema/available.html")
+        self.assertEqual(title, "a title")
+
+    def test_extracts_description_via_generic_preview(self):
+        """
+        """
+        title, description, image = web_preview("http://localhost:8000/generic-preview/h1-p-desc.html")
+        self.assertEqual(description, "This is valid description.")
 
 
 if __name__ == '__main__':

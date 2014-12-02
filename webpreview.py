@@ -199,3 +199,23 @@ class Schema(SocialPreviewBase):
     def __init__(self, *args):
         self._target_attribute =  "itemprop"
         super(Schema, self).__init__(*args)
+
+
+def web_preview(url):
+    """
+    Extract title, description and image from OpenGraph or TwitterCard or Schema or GenericPreview. Which ever returns first.
+    """
+    og = OpenGraph(url, ['og:title', 'og:description', 'og:image'])
+    if og.title:
+        return og.title, og.description, og.image
+
+    tc = TwitterCard(url, ['twitter:title', 'twitter:description', 'twitter:image'])
+    if tc.title:
+        return tc.title, tc.description, tc.image
+
+    s = Schema(url, ['name', 'description', 'image'])
+    if s.name:
+        return s.name, s.description, s.image
+
+    gp = GenericPreview(url)
+    return gp.title, gp.description, gp.image
