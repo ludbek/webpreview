@@ -1,6 +1,6 @@
 import unittest
 from webpreview import PreviewBase, GenericPreview
-from webpreview import EmptyURL, InvalidURL, URLNotFound, URLUnreachable
+from webpreview import EmptyURL, InvalidURL, URLNotFound, URLUnreachable, OpenGraphPreview
 
 class TestPreviewBase(unittest.TestCase):
     """
@@ -127,6 +127,27 @@ class TestGenericPreview(unittest.TestCase):
         self.assertEqual(apreview.title, None)
         self.assertEqual(apreview.desc, None)
         self.assertEqual(apreview.img, None)
+
+
+class TestOpenGraph(unittest.TestCase):
+    """
+    Test OpenGraphPreview.
+    """
+    def test_extracts_n_assigns_properties_to_instance(self):
+        """
+        OpenGraphPreview extracts properties from a web page and assigns corresponding property-value to its instance.
+        """
+        ogpreview = OpenGraphPreview("http://localhost:8000/open-graph/available.html", ['og:title', 'og:price:amount'])
+        self.assertEqual(ogpreview.title, "a title")
+        self.assertEqual(ogpreview.price_amount, "1")
+
+    def test_unavailable_empty_properties_get_none(self):
+        """
+        OpenGraphPreview assigns None to properties not found in the web page.
+        """
+        ogpreview = OpenGraphPreview("http://localhost:8000/open-graph/unavailable.html", ['og:title', 'og:price:amount'])
+        self.assertEqual(ogpreview.title, None)
+        self.assertEqual(ogpreview.price_amount, None)
 
 
 if __name__ == '__main__':

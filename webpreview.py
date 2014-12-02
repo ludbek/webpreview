@@ -127,3 +127,22 @@ class GenericPreview(PreviewBase):
             if first_img and first_img['src'] != "":
                 return first_img['src']
         return None
+
+
+class OpenGraphPreview(PreviewBase):
+    """
+    Gets OpenGraph meta properties of a webpage.
+    """
+    def __init__(self, *args):
+        super(OpenGraphPreview, self).__init__(*args)
+        self._set_properties()
+
+    def _set_properties(self):
+        soup = self._soup
+        for property in self.config:
+            property_meta = soup.find('meta', attrs = {'property': property})
+            new_property =  property.split(':',1)[1].replace(':', '_')
+            if property_meta and property_meta['content'] != "":
+                self.__dict__[new_property] = property_meta['content']
+            else:
+                self.__dict__[new_property] = None
