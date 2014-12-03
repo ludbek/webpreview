@@ -1,4 +1,4 @@
-Metadata-Version: 1.0
+Metadata-Version: 1.1
 Name: webpreview
 Version: 0.1.0dev
 Summary: Extracts OpenGraph, TwitterCard and Schema properties from a webpage.
@@ -67,3 +67,4 @@ Description: # About
         
 Keywords: OpenGraph TwitterCard Schema Facebook Twitter Google+
 Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 2.7
