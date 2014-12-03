@@ -35,7 +35,7 @@ Below is a snippet showing its usage.
     => "2013-09-17T05:59:00+01:00"
 	
 	# It converts `:` in a property into `_`.
-    $og.price_amount
+    $ og.price_amount
     => "15.00"
 
 ## Twitter Card
@@ -51,8 +51,8 @@ Webpreview supports Schema through the class `Schema`. Right now it extracts pro
 
     $ from webpreview import Schema
     $ aschema = Schema("aurl.com", ["name", "camelCaseProperty"]
-    $aschema.name
+    $ aschema.name
     # It makes Camel Case properties available as Snake Case.
-    $aschema.camel_case_property
+    $ aschema.camel_case_property
 
 
