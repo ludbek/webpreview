@@ -1,0 +1,13 @@
+README.txt
+setup.cfg
+setup.py
+webpreview/__init__.py
+webpreview/test.py
+webpreview/webpreview.py
+webpreview.egg-info/PKG-INFO
+webpreview.egg-info/SOURCES.txt
+webpreview.egg-info/dependency_links.txt
+webpreview.egg-info/entry_points.txt
+webpreview.egg-info/requires.txt
+webpreview.egg-info/top_level.txt
+webpreview.egg-info/zip-safe

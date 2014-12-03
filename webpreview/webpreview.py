@@ -119,7 +119,7 @@ class GenericPreview(PreviewBase):
         if first_h1:
             first_p = first_h1.find_next('p')
             if (first_p and first_p.string != ''):
-                return first_p.string
+                return first_p.text
         # else extract preview from the first <p>
         first_p = soup.find('p')
         if (first_p and first_p.string != ""):
