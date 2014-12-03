@@ -6,7 +6,7 @@ version = '0.1.0'
 setup(name='webpreview',
       version=version,
       description="Extracts OpenGraph, TwitterCard and Schema properties from a webpage.",
-      long_description=open('README').read(),
+      long_description=open('README.md').read(),
       classifiers=[
 	'Programming Language :: Python :: 2.7',
       ],
