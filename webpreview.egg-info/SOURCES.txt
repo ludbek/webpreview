@@ -1,4 +1,4 @@
-README.txt
+README
 setup.cfg
 setup.py
 webpreview/__init__.py
