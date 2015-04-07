@@ -8,7 +8,7 @@ setup(name='webpreview',
       description="Extracts OpenGraph, TwitterCard and Schema properties from a webpage.",
       long_description=open('README.md').read(),
       classifiers=[
-	'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 2.7',
       ],
       keywords='OpenGraph TwitterCard Schema Facebook Twitter Google+',
       author='ludbek',
@@ -19,10 +19,10 @@ setup(name='webpreview',
       include_package_data=True,
       zip_safe=True,
       install_requires=[
-          "requests==2.2.1",
-	  "beautifulsoup4==4.3.2",
+        "requests==2.2.1",
+        "beautifulsoup4==4.3.2",
       ],
       entry_points="""
-      # -*- Entry points: -*-
-      """,
+        # -*- Entry points: -*-
+        """,
       )
