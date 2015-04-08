@@ -1,1 +1,1 @@
-from webpreview import *
+from previews import *

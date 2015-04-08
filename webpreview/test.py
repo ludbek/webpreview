@@ -1,5 +1,7 @@
 import unittest
-from webpreview import *
+
+from previews import *
+from exceptions import *
 
 class TestPreviewBase(unittest.TestCase):
     """
