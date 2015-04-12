@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import sys, os
 
-version = '1.0.2'
+version = '1.0.3'
 
 setup(name='webpreview',
       version=version,
@@ -9,6 +9,7 @@ setup(name='webpreview',
       long_description=open('README.md').read(),
       classifiers=[
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.3',
       ],
       keywords='OpenGraph TwitterCard Schema Facebook Twitter Google+',
       author='ludbek',
