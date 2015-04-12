@@ -3,3 +3,4 @@ dist/
 webpreview.egg-info/
 webpreview.sublime-project
 webpreview.sublime-workspace
+.tox
