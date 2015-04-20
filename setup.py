@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import sys, os
 
-version = '1.0.3'
+version = '1.0.4'
 
 setup(name='webpreview',
       version=version,
@@ -16,7 +16,7 @@ setup(name='webpreview',
       author_email='sth.srn@gmail.com',
       url='https://github.com/ludbek/webpreview',
       license='LICENSE.txt',
-      packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
+      packages=find_packages(exclude=['test']),
       include_package_data=True,
       zip_safe=True,
       install_requires=[
