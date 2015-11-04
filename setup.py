@@ -21,7 +21,7 @@ setup(name='webpreview',
       zip_safe=True,
       install_requires=[
         "requests==2.2.1",
-        "beautifulsoup4==4.3.2",
+        "beautifulsoup4==4.4.1",
       ],
       entry_points="""
         # -*- Entry points: -*-
