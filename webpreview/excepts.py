@@ -1,27 +1,33 @@
-class EmptyURL(Exception):
+class WebpreviewException(Exception):
     """
-    Exception for empty URL.
-    """
-    pass
-
-
-class EmptyProperties(Exception):
-    """
-    Exception for empty properties.
+    Base Webpreview Exception.
     """
     pass
 
 
-class URLNotFound(Exception):
+class EmptyURL(WebpreviewException):
     """
-    Exception for 404 URLs.
+    WebpreviewException for empty URL.
+    """
+    pass
+
+
+class EmptyProperties(WebpreviewException):
+    """
+    WebpreviewException for empty properties.
     """
     pass
 
 
-class URLUnreachable(Exception):
+class URLNotFound(WebpreviewException):
     """
-    Exception for 404 URLs.
+    WebpreviewException for 404 URLs.
     """
     pass
 
+
+class URLUnreachable(WebpreviewException):
+    """
+    WebpreviewException for 404 URLs.
+    """
+    pass
