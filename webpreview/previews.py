@@ -4,7 +4,7 @@ import requests
 from requests.exceptions import *
 from bs4 import BeautifulSoup
 
-from excepts import *
+from .excepts import *
 
 
 class PreviewBase(object):
