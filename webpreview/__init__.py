@@ -1,1 +1,1 @@
-from previews import *
+from .previews import *
