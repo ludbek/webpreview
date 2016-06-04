@@ -10,6 +10,7 @@ setup(name='webpreview',
       classifiers=[
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.5',
       ],
       keywords='OpenGraph TwitterCard Schema Facebook Twitter Google+',
       author='ludbek',

@@ -5,3 +5,5 @@ webpreview.sublime-project
 webpreview.sublime-workspace
 .tox
 .brofile
+.env
+.python-version
