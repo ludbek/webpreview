@@ -7,12 +7,19 @@ Webpreview helps preview a webpage. It extracts [Open Graph](http://ogp.me/), [T
 
 #Usage
 ## Preview a Web Page
+API: `web_preview(timeout?)`
+
 Use `web_preview` for extracting title, description and thumbnail image. It tries to extract them from Open Graph properties, if not found it falls back to Twitter Card, and so on  till Schema.  If non works it tries to extract from the webpage's content.
 
     $ from webpreview import web_preview
     $ title, description, image = web_preview("aurl.com")
 
+    # specifing timeout which gets passed to requests.get()
+    $ title, description, image = web_preview("a_slow_url.com", timeout=1000)
+
 ## Open Graph
+API: `OpenGraph(url, properties, timeout?)`
+
 `OpenGraph` extracts Open Graph meta properties. Consider following meta tags.
 
     <!--doc snippet at aurl.com -->
@@ -39,6 +46,8 @@ Below is a snippet showing its usage.
     => "15.00"
 
 ## Twitter Card
+API: `TwitterCard(url, properties, timeout?)`
+
 `TwitterCard` extracts Twitter Card meta properties from the given webpage. Its usage is similar to `OpenGraph`.
 
     $ from webpreview import TwitterCard
@@ -47,6 +56,8 @@ Below is a snippet showing its usage.
     $ tc.image
 
 ## Schema
+API: `Schema(url, properties, timeout?)`
+
 Webpreview supports Schema through the class `Schema`. Right now it extracts properties in meta tags only.
 
     $ from webpreview import Schema

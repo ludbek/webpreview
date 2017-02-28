@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import sys, os
 
-version = '1.0.4'
+version = '1.2.0'
 
 setup(name='webpreview',
       version=version,
@@ -21,8 +21,8 @@ setup(name='webpreview',
       include_package_data=True,
       zip_safe=True,
       install_requires=[
-        "requests==2.2.1",
-        "beautifulsoup4==4.4.1",
+        "requests==2.13.0",
+        "beautifulsoup4==4.5.3",
       ],
       entry_points="""
         # -*- Entry points: -*-
