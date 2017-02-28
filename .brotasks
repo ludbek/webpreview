@@ -1,0 +1,15 @@
+#!/bin/sh
+
+# $1, is the name of the project
+# $2, is the task to be executed
+# $3 and above, are rest of the arguments passed to the task
+
+case $2 in
+    default)
+        echo "Happy hacking !!!"
+	;;
+    publish)
+        python setup.py bdist_wheel
+        twine upload dist/*
+        ;;
+esac

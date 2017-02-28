@@ -7,3 +7,4 @@ webpreview.sublime-workspace
 .brofile
 .env
 .python-version
+build/
