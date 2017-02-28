@@ -11,7 +11,7 @@ class PreviewBase(object):
     """
     Base for all web preview.
     """
-    def __init__(self, url = None, properties = None):
+    def __init__(self, url = None, properties = None, timeout=None):
         # if no first argument raise URL required exception
         if not url:
             raise EmptyURL("Please pass a valid URL as the first argument.")
@@ -30,7 +30,7 @@ class PreviewBase(object):
 
         # if no schema add http as default
         try:
-            res = requests.get(url)
+            res = requests.get(url, timeout=timeout)
         except (ConnectionError, HTTPError, Timeout, TooManyRedirects):
             raise URLUnreachable("The URL does not exists.")
         except MissingSchema: # if no schema add http as default
@@ -38,7 +38,7 @@ class PreviewBase(object):
 
         # throw URLUnreachable exception for just incase
         try:
-            res = requests.get(url)
+            res = requests.get(url, timeout=timeout)
         except (ConnectionError, HTTPError, Timeout, TooManyRedirects):
             raise URLUnreachable("The URL is unreachable.")
 
@@ -60,8 +60,8 @@ class GenericPreview(PreviewBase):
     """
     Extracts title, description, image from a webpage's body instead of the meta tags.
     """
-    def __init__(self, url = None, properties = ['title', 'description', 'image']):
-        super(GenericPreview, self).__init__(url, properties)
+    def __init__(self, url = None, properties = ['title', 'description', 'image'], timeout=None):
+        super(GenericPreview, self).__init__(url, properties, timeout=timeout)
         self.title = self._get_title()
         self.description = self._get_description()
         self.image = self._get_image()
@@ -120,8 +120,8 @@ class SocialPreviewBase(PreviewBase):
     """
     Abstract class for OpenGraph, TwitterCard and Google+.
     """
-    def __init__(self, *args):
-        super(SocialPreviewBase, self).__init__(*args)
+    def __init__(self, *args, **kwargs):
+        super(SocialPreviewBase, self).__init__(*args, **kwargs)
         self._set_properties()
         # OpengGraph has <meta property="" content="">
         # TwitterCard  has <meta name="" content="">
@@ -153,44 +153,44 @@ class OpenGraph(SocialPreviewBase):
     """
     Gets OpenGraph meta properties of a webpage.
     """
-    def __init__(self, *args):
+    def __init__(self, *args, **kwargs):
         self._target_attribute =  "property"
-        super(OpenGraph, self).__init__(*args)
+        super(OpenGraph, self).__init__(*args, **kwargs)
 
 
 class TwitterCard(SocialPreviewBase):
     """
     Gets TwitterCard meta properties of a webpage.
     """
-    def __init__(self, *args):
+    def __init__(self, *args, **kwargs):
         self._target_attribute =  "name"
-        super(TwitterCard, self).__init__(*args)
+        super(TwitterCard, self).__init__(*args, **kwargs)
 
 
 class Schema(SocialPreviewBase):
     """
     Gets Schema meta properties from a website.
     """
-    def __init__(self, *args):
+    def __init__(self, *args, **kwargs):
         self._target_attribute =  "itemprop"
-        super(Schema, self).__init__(*args)
+        super(Schema, self).__init__(*args, **kwargs)
 
 
-def web_preview(url):
+def web_preview(url, timeout=None):
     """
     Extract title, description and image from OpenGraph or TwitterCard or Schema or GenericPreview. Which ever returns first.
     """
-    og = OpenGraph(url, ['og:title', 'og:description', 'og:image'])
+    og = OpenGraph(url, ['og:title', 'og:description', 'og:image'], timeout=timeout)
     if og.title:
         return og.title, og.description, og.image
 
-    tc = TwitterCard(url, ['twitter:title', 'twitter:description', 'twitter:image'])
+    tc = TwitterCard(url, ['twitter:title', 'twitter:description', 'twitter:image'], timeout=timeout)
     if tc.title:
         return tc.title, tc.description, tc.image
 
-    s = Schema(url, ['name', 'description', 'image'])
+    s = Schema(url, ['name', 'description', 'image'], timeout=timeout)
     if s.name:
         return s.name, s.description, s.image
 
-    gp = GenericPreview(url)
+    gp = GenericPreview(url, timeout=timeout)
     return gp.title, gp.description, gp.image
