@@ -53,7 +53,7 @@ class PreviewBase(object):
             raise EmptyProperties("Please pass list of properties to be extracted.")
         # its safe to assign properties
         self.properties = properties
-        self._soup = BeautifulSoup(res.text)
+        self._soup = BeautifulSoup(res.text, "html.parser")
 
 
 class GenericPreview(PreviewBase):
