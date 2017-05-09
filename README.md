@@ -7,7 +7,7 @@ Webpreview helps preview a webpage. It extracts [Open Graph](http://ogp.me/), [T
 
 #Usage
 ## Preview a Web Page
-API: `web_preview(timeout?)`
+API: `web_preview(url, timeout?, headers?)`
 
 Use `web_preview` for extracting title, description and thumbnail image. It tries to extract them from Open Graph properties, if not found it falls back to Twitter Card, and so on  till Schema.  If non works it tries to extract from the webpage's content.
 
@@ -16,6 +16,10 @@ Use `web_preview` for extracting title, description and thumbnail image. It trie
 
     # specifing timeout which gets passed to requests.get()
     $ title, description, image = web_preview("a_slow_url.com", timeout=1000)
+
+    # passing headers
+    $ headers = {'User-Agent': 'Mozilla/5.0'}
+    $ title, description, image = web_preview("a_slow_url.com", headers=headers)
 
 ## Open Graph
 API: `OpenGraph(url, properties, timeout?)`

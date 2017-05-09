@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import sys, os
 
-version = '1.3.0'
+version = '1.3.1'
 
 setup(name='webpreview',
       version=version,
