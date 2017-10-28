@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/ludbek/webpreview.svg?branch=master)](https://travis-ci.org/ludbek/webpreview)
+
 # About
 Webpreview helps preview a webpage. It extracts [Open Graph](http://ogp.me/), [Twitter Card](https://dev.twitter.com/cards/overview) and [Schema](http://schema.org/) meta tags. Given a URL of a page, it extracts title, thumbnail, description, etc as per request.
 
