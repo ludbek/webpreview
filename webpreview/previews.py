@@ -4,8 +4,8 @@ import requests
 from requests.exceptions import *
 from bs4 import BeautifulSoup
 
-from excepts import *
-from helpers import process_image_url
+from .excepts import *
+from .helpers import process_image_url
 
 
 class PreviewBase(object):

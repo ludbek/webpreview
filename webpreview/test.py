@@ -4,8 +4,8 @@ try:
 except ImportError:
     from urllib.parse import urlparse  # Python3
 
-from previews import *
-from excepts import *
+from webpreview.previews import *
+from webpreview.excepts import *
 
 class TestPreviewBase(unittest.TestCase):
     """
