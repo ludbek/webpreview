@@ -241,7 +241,7 @@ class TestWebPreview(unittest.TestCase):
         When a relative image path is found, the full absolute path is returned if the flag is True.
         """
         url = "http://localhost:8000/open-graph/available-img-relative-path.html"
-        title, description, image = web_preview(url, absolute_url=True)
+        title, description, image = web_preview(url, absolute_image_url=True)
         scheme, netloc, *_ = urlparse(url)
         base_url = '{}://{}'.format(scheme, netloc)
         self.assertTrue(image.startswith(base_url))
@@ -251,7 +251,7 @@ class TestWebPreview(unittest.TestCase):
         When a relative image path is found, the full absolute path is returned if the flag is True.
         """
         url = "http://localhost:8000/twitter-card/available-img-relative-path.html"
-        title, description, image = web_preview(url, absolute_url=True)
+        title, description, image = web_preview(url, absolute_image_url=True)
         scheme, netloc, *_ = urlparse(url)
         base_url = '{}://{}'.format(scheme, netloc)
         self.assertTrue(image.startswith(base_url))
@@ -261,7 +261,7 @@ class TestWebPreview(unittest.TestCase):
         When a relative image path is found, the full absolute path is returned if the flag is True.
         """
         url = "http://localhost:8000/schema/available-img-relative-path.html"
-        title, description, image = web_preview(url, absolute_url=True)
+        title, description, image = web_preview(url, absolute_image_url=True)
         scheme, netloc, *_ = urlparse(url)
         base_url = '{}://{}'.format(scheme, netloc)
         self.assertTrue(image.startswith(base_url))
@@ -271,7 +271,7 @@ class TestWebPreview(unittest.TestCase):
         When a relative image path is found, the full absolute path is returned if the flag is True.
         """
         url = "http://localhost:8000/generic-preview/h1-img-relative-path.html"
-        title, description, image = web_preview(url, absolute_url=True)
+        title, description, image = web_preview(url, absolute_image_url=True)
         scheme, netloc, *_ = urlparse(url)
         base_url = '{}://{}'.format(scheme, netloc)
         self.assertTrue(image.startswith(base_url))
