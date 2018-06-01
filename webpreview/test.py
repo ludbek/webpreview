@@ -1,7 +1,11 @@
 import unittest
+try:
+    from urlparse import urlparse  # Python2
+except ImportError:
+    from urllib.parse import urlparse  # Python3
 
-from webpreview.previews import *
-from webpreview.excepts import *
+from previews import *
+from excepts import *
 
 class TestPreviewBase(unittest.TestCase):
     """
@@ -162,7 +166,6 @@ class TestOpenGraph(unittest.TestCase):
         self.assertEqual(ogpreview.price_amount, None)
 
 
-
 class TestTwitterCard(unittest.TestCase):
     """
     Test TwitterCard.
@@ -209,7 +212,7 @@ class TestWebPreview(unittest.TestCase):
     """
     Test web_preview.
     """
-    def test_extracts_title_via_openg_graph(self):
+    def test_extracts_title_via_open_graph(self):
         """
         """
         title, description, image = web_preview("http://localhost:8000/open-graph/available.html")
@@ -232,6 +235,46 @@ class TestWebPreview(unittest.TestCase):
         """
         title, description, image = web_preview("http://localhost:8000/generic-preview/h1-p-desc.html")
         self.assertEqual(description, "This is valid description.")
+
+    def test_relative_image_path_returns_absolute_path_via_open_graph(self):
+        """
+        When a relative image path is found, the full absolute path is returned if the flag is True.
+        """
+        url = "http://localhost:8000/open-graph/available-img-relative-path.html"
+        title, description, image = web_preview(url, absolute_url=True)
+        scheme, netloc, *_ = urlparse(url)
+        base_url = '{}://{}'.format(scheme, netloc)
+        self.assertTrue(image.startswith(base_url))
+
+    def test_relative_image_path_returns_absolute_path_via_twitter_card(self):
+        """
+        When a relative image path is found, the full absolute path is returned if the flag is True.
+        """
+        url = "http://localhost:8000/twitter-card/available-img-relative-path.html"
+        title, description, image = web_preview(url, absolute_url=True)
+        scheme, netloc, *_ = urlparse(url)
+        base_url = '{}://{}'.format(scheme, netloc)
+        self.assertTrue(image.startswith(base_url))
+
+    def test_relative_image_path_returns_absolute_path_via_schema(self):
+        """
+        When a relative image path is found, the full absolute path is returned if the flag is True.
+        """
+        url = "http://localhost:8000/schema/available-img-relative-path.html"
+        title, description, image = web_preview(url, absolute_url=True)
+        scheme, netloc, *_ = urlparse(url)
+        base_url = '{}://{}'.format(scheme, netloc)
+        self.assertTrue(image.startswith(base_url))
+
+    def test_relative_image_path_returns_absolute_path_via_generic_preview(self):
+        """
+        When a relative image path is found, the full absolute path is returned if the flag is True.
+        """
+        url = "http://localhost:8000/generic-preview/h1-img-relative-path.html"
+        title, description, image = web_preview(url, absolute_url=True)
+        scheme, netloc, *_ = urlparse(url)
+        base_url = '{}://{}'.format(scheme, netloc)
+        self.assertTrue(image.startswith(base_url))
 
 
 if __name__ == '__main__':
