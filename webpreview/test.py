@@ -242,7 +242,7 @@ class TestWebPreview(unittest.TestCase):
         """
         url = "http://localhost:8000/open-graph/available-img-relative-path.html"
         title, description, image = web_preview(url, absolute_image_url=True)
-        scheme, netloc, *_ = urlparse(url)
+        scheme, netloc, path, params, query, fragment = urlparse(url)
         base_url = '{}://{}'.format(scheme, netloc)
         self.assertTrue(image.startswith(base_url))
 
@@ -252,7 +252,7 @@ class TestWebPreview(unittest.TestCase):
         """
         url = "http://localhost:8000/twitter-card/available-img-relative-path.html"
         title, description, image = web_preview(url, absolute_image_url=True)
-        scheme, netloc, *_ = urlparse(url)
+        scheme, netloc, path, params, query, fragment = urlparse(url)
         base_url = '{}://{}'.format(scheme, netloc)
         self.assertTrue(image.startswith(base_url))
 
@@ -262,7 +262,7 @@ class TestWebPreview(unittest.TestCase):
         """
         url = "http://localhost:8000/schema/available-img-relative-path.html"
         title, description, image = web_preview(url, absolute_image_url=True)
-        scheme, netloc, *_ = urlparse(url)
+        scheme, netloc, path, params, query, fragment = urlparse(url)
         base_url = '{}://{}'.format(scheme, netloc)
         self.assertTrue(image.startswith(base_url))
 
@@ -272,7 +272,7 @@ class TestWebPreview(unittest.TestCase):
         """
         url = "http://localhost:8000/generic-preview/h1-img-relative-path.html"
         title, description, image = web_preview(url, absolute_image_url=True)
-        scheme, netloc, *_ = urlparse(url)
+        scheme, netloc, path, params, query, fragment = urlparse(url)
         base_url = '{}://{}'.format(scheme, netloc)
         self.assertTrue(image.startswith(base_url))
 
