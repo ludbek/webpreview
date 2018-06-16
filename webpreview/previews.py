@@ -5,6 +5,7 @@ from requests.exceptions import *
 from bs4 import BeautifulSoup
 
 from .excepts import *
+from .helpers import process_image_url
 
 
 class PreviewBase(object):
@@ -32,7 +33,7 @@ class PreviewBase(object):
         try:
             res = requests.get(url, timeout=timeout, headers=headers)
         except (ConnectionError, HTTPError, Timeout, TooManyRedirects):
-            raise URLUnreachable("The URL does not exists.")
+            raise URLUnreachable("The URL does not exist.")
         except MissingSchema: # if no schema add http as default
             url = "http://" + url
 
@@ -43,7 +44,7 @@ class PreviewBase(object):
             raise URLUnreachable("The URL is unreachable.")
 
         if res.status_code == 404:
-            raise URLNotFound("The web page does not exists.")
+            raise URLNotFound("The web page does not exist.")
 
         # its safe to assign the url
         self.url = url
@@ -176,21 +177,21 @@ class Schema(SocialPreviewBase):
         super(Schema, self).__init__(*args, **kwargs)
 
 
-def web_preview(url, timeout=None, headers=None):
+def web_preview(url, timeout=None, headers=None, absolute_image_url=False):
     """
     Extract title, description and image from OpenGraph or TwitterCard or Schema or GenericPreview. Which ever returns first.
     """
     og = OpenGraph(url, ['og:title', 'og:description', 'og:image'], timeout=timeout, headers=headers)
     if og.title:
-        return og.title, og.description, og.image
+        return og.title, og.description, process_image_url(url, og.image, absolute_image_url)
 
     tc = TwitterCard(url, ['twitter:title', 'twitter:description', 'twitter:image'], timeout=timeout, headers=headers)
     if tc.title:
-        return tc.title, tc.description, tc.image
+        return tc.title, tc.description, process_image_url(url, tc.image, absolute_image_url)
 
     s = Schema(url, ['name', 'description', 'image'], timeout=timeout, headers=headers)
     if s.name:
-        return s.name, s.description, s.image
+        return s.name, s.description, process_image_url(url, s.image, absolute_image_url)
 
     gp = GenericPreview(url, timeout=timeout, headers=headers)
-    return gp.title, gp.description, gp.image
+    return gp.title, gp.description, process_image_url(url, gp.image, absolute_image_url)
