@@ -12,7 +12,7 @@ class PreviewBase(object):
     """
     Base for all web preview.
     """
-    def __init__(self, url = None, properties = None, timeout=None, headers=None):
+    def __init__(self, url = None, properties = None, timeout=None, headers=None, content=None):
         # if no first argument raise URL required exception
         if not url:
             raise EmptyURL("Please pass a valid URL as the first argument.")
@@ -37,6 +37,21 @@ class PreviewBase(object):
         except MissingSchema: # if no schema add http as default
             url = "http://" + url
 
+        # if content is provided don't fetch from url
+        if not content:
+            content = PreviewBase.get_content(url)
+
+        # its safe to assign the url
+        self.url = url
+
+        if not properties:
+            raise EmptyProperties("Please pass list of properties to be extracted.")
+        # its safe to assign properties
+        self.properties = properties
+        self._soup = BeautifulSoup(content, "html.parser")
+
+    @staticmethod
+    def get_content(url, timeout, headers):
         # throw URLUnreachable exception for just incase
         try:
             res = requests.get(url, timeout=timeout, headers=headers)
@@ -46,23 +61,15 @@ class PreviewBase(object):
         if res.status_code == 404:
             raise URLNotFound("The web page does not exist.")
 
-        # its safe to assign the url
-        self.url = url
-
-
-        if not properties:
-            raise EmptyProperties("Please pass list of properties to be extracted.")
-        # its safe to assign properties
-        self.properties = properties
-        self._soup = BeautifulSoup(res.text, "html.parser")
-
+        return res.text
 
 class GenericPreview(PreviewBase):
     """
     Extracts title, description, image from a webpage's body instead of the meta tags.
     """
-    def __init__(self, url = None, properties = ['title', 'description', 'image'], timeout=None, headers=None):
-        super(GenericPreview, self).__init__(url, properties, timeout=timeout, headers=headers)
+    def __init__(self, url = None, properties = ['title', 'description', 'image'], timeout=None, headers=None,
+                 content=None):
+        super(GenericPreview, self).__init__(url, properties, timeout=timeout, headers=headers, content=content)
         self.title = self._get_title()
         self.description = self._get_description()
         self.image = self._get_image()
@@ -177,21 +184,22 @@ class Schema(SocialPreviewBase):
         super(Schema, self).__init__(*args, **kwargs)
 
 
-def web_preview(url, timeout=None, headers=None, absolute_image_url=False):
+def web_preview(url, timeout=None, headers=None, absolute_image_url=False, content=None):
     """
     Extract title, description and image from OpenGraph or TwitterCard or Schema or GenericPreview. Which ever returns first.
     """
-    og = OpenGraph(url, ['og:title', 'og:description', 'og:image'], timeout=timeout, headers=headers)
+    og = OpenGraph(url, ['og:title', 'og:description', 'og:image'], timeout=timeout, headers=headers, content=content)
     if og.title:
         return og.title, og.description, process_image_url(url, og.image, absolute_image_url)
 
-    tc = TwitterCard(url, ['twitter:title', 'twitter:description', 'twitter:image'], timeout=timeout, headers=headers)
+    tc = TwitterCard(url, ['twitter:title', 'twitter:description', 'twitter:image'], timeout=timeout, headers=headers,
+                     content=content)
     if tc.title:
         return tc.title, tc.description, process_image_url(url, tc.image, absolute_image_url)
 
-    s = Schema(url, ['name', 'description', 'image'], timeout=timeout, headers=headers)
+    s = Schema(url, ['name', 'description', 'image'], timeout=timeout, headers=headers, content=content)
     if s.name:
         return s.name, s.description, process_image_url(url, s.image, absolute_image_url)
 
-    gp = GenericPreview(url, timeout=timeout, headers=headers)
+    gp = GenericPreview(url, timeout=timeout, headers=headers, content=content)
     return gp.title, gp.description, process_image_url(url, gp.image, absolute_image_url)
