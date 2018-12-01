@@ -67,8 +67,7 @@ class GenericPreview(PreviewBase):
     """
     Extracts title, description, image from a webpage's body instead of the meta tags.
     """
-    def __init__(self, url = None, properties = ['title', 'description', 'image'], timeout=None, headers=None,
-                 content=None):
+    def __init__(self, url = None, properties = ['title', 'description', 'image'], timeout=None, headers=None, content=None):
         super(GenericPreview, self).__init__(url, properties, timeout=timeout, headers=headers, content=content)
         self.title = self._get_title()
         self.description = self._get_description()
