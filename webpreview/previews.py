@@ -39,7 +39,7 @@ class PreviewBase(object):
 
         # if content is provided don't fetch from url
         if not content:
-            content = PreviewBase.get_content(url)
+            content = PreviewBase.get_content(url, timeout, headers)
 
         # its safe to assign the url
         self.url = url
