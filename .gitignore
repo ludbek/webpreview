@@ -7,3 +7,4 @@ webpreview.sublime-workspace
 .env
 .python-version
 build/
+.vscode
