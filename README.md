@@ -9,7 +9,7 @@ Webpreview helps preview a webpage. It extracts [Open Graph](http://ogp.me/), [T
 
 #Usage
 ## Preview a Web Page
-API: `web_preview(url, timeout?, headers?, content?, absolute_image_url?)`
+API: `web_preview(url, timeout?, headers?, content?, absolute_image_url?, parser?)`
 
 Use `web_preview` for extracting title, description and thumbnail image. It tries to extract them from Open Graph properties, if not found it falls back to Twitter Card, and so on  till Schema.  If non works it tries to extract from the webpage's content.
 
@@ -27,8 +27,12 @@ Use `web_preview` for extracting title, description and thumbnail image. It trie
     $ content = """<html><head><title>Dummy HTML</title></head></html>"""
     $ title, description, image = web_preview("aurl.com", content=content)
 
+    # specifing the parser
+    # by default webpreview uses 'html.parser'
+    $ title, description, image = web_preview("aurl.com", content=content, parser='lxml')
+
 ## Open Graph
-API: `OpenGraph(url, properties, timeout?, headers?, content?)`
+API: `OpenGraph(url, properties, timeout?, headers?, content?, parser?)`
 
 `OpenGraph` extracts Open Graph meta properties. Consider following meta tags.
 
@@ -56,7 +60,7 @@ Below is a snippet showing its usage.
     => "15.00"
 
 ## Twitter Card
-API: `TwitterCard(url, properties, timeout?, headers?, content?)`
+API: `TwitterCard(url, properties, timeout?, headers?, content?, parser?)`
 
 `TwitterCard` extracts Twitter Card meta properties from the given webpage. Its usage is similar to `OpenGraph`.
 
@@ -66,7 +70,7 @@ API: `TwitterCard(url, properties, timeout?, headers?, content?)`
     $ tc.image
 
 ## Schema
-API: `Schema(url, properties, timeout?, headers?, content?)`
+API: `Schema(url, properties, timeout?, headers?, content?, parser?)`
 
 Webpreview supports Schema through the class `Schema`. Right now it extracts properties in meta tags only.
 
