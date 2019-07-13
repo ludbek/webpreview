@@ -7,6 +7,10 @@ Webpreview helps preview a webpage. It extracts [Open Graph](http://ogp.me/), [T
 
     $ pip install webpreview
 
+## Run with Docker
+    $ docker build -t webpreview:1.6.0 .
+    $ docker run -it --rm --name webpreview webpreview:1.6.0 python
+    
 #Usage
 ## Preview a Web Page
 API: `web_preview(url, timeout?, headers?, content?, absolute_image_url?, parser?)`
