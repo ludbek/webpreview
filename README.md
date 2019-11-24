@@ -7,14 +7,7 @@ Webpreview helps preview a webpage. It extracts [Open Graph](http://ogp.me/), [T
 
     $ pip install webpreview
 
-## Run with Docker
-    $ docker build -t webpreview .
-    $ docker run -it --rm --name webpreview webpreview python
-
-### Run your script
-    $ docker run -it --rm --name my-script -v "$PWD":/usr/src/myapp -w /usr/src/myapp webpreview python your-script.py
-
-#Usage
+# Usage
 ## Preview a Web Page
 API: `web_preview(url, timeout?, headers?, content?, absolute_image_url?, parser?)`
 
@@ -87,4 +80,9 @@ Webpreview supports Schema through the class `Schema`. Right now it extracts pro
     # It makes Camel Case properties available as Snake Case.
     $ aschema.camel_case_property
 
+## Run with Docker
+    $ docker build -t webpreview .
+    $ docker run -it --rm --name webpreview webpreview python
 
+### Run your script
+    $ docker run -it --rm --name my-script -v "$PWD":/usr/src/myapp -w /usr/src/myapp webpreview python your-script.py
