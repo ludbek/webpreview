@@ -31,3 +31,10 @@ class URLUnreachable(WebpreviewException):
     WebpreviewException for 404 URLs.
     """
     pass
+
+
+class MissingContent(WebpreviewException):
+    """
+    WebpreviewException for query preview without valid text content
+    """
+    pass

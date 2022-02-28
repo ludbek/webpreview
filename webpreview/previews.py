@@ -8,7 +8,7 @@ from .excepts import *
 from .helpers import process_image_url
 
 
-class LengthLimitedResponse(requests.Response):
+class MaxLengthResponse(requests.Response):
 
     def __init__(self, response: requests.Response, content_length_limit=None, origin_url=None):
         self.__setstate__(response.__getstate__())
@@ -75,17 +75,14 @@ def do_request(url=None, timeout=None, headers=None, content_length_limit=None):
         raise InvalidURL("The URL is invalid.")
 
     # if no schema add http as default
-    try:
-        if not (url.startswith('http://') or url.startswith('https://')):
-            raise MissingSchema()
-    except MissingSchema: # if no schema add http as default
-            url = "http://" + url
+    if not (url.startswith('http://') or url.startswith('https://')):
+        url = "http://" + url
 
     try:
         with requests.get(url, timeout=timeout, headers=headers, stream=True) as response:
             if response.status_code == 404:
                 raise URLNotFound("The web page does not exist.")
-            return LengthLimitedResponse(response, content_length_limit, origin_url=url)
+            return MaxLengthResponse(response, content_length_limit, origin_url=url)
     except (ConnectionError, HTTPError, Timeout, TooManyRedirects):
         raise URLUnreachable("The URL does not exist.")
 
@@ -100,7 +97,7 @@ class PreviewBase(object):
             content = response.text_content
             url = response.origin_url
         if not content:
-                raise Exception()
+            raise MissingContent('{} does not have a valid text content'.format(url))
 
         # its safe to assign the url
         self.url = url
