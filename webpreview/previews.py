@@ -8,38 +8,96 @@ from .excepts import *
 from .helpers import process_image_url
 
 
+class MaxLengthResponse(requests.Response):
+
+    def __init__(self, response: requests.Response, content_length_limit=None, origin_url=None):
+        self.__setstate__(response.__getstate__())
+        self.content_length_limit = content_length_limit
+        self.origin_url = origin_url
+
+    @property
+    def binary_content(self):
+        content_length = self.headers.get("content-length")
+        # Unallow content that are explicitly too big,
+        # We still accept content without content_length as forbidding this will break
+        if not self.allowed_content_length:
+            binary_content = None
+        else:
+            chunk_data = []
+            length = 0
+
+            for chunk in self.iter_content(1024):
+                chunk_data.append(chunk)
+                length += len(chunk)
+                if self.content_length_limit and length > self.content_length_limit:
+                    return None
+
+            binary_content = b''.join(chunk_data)
+        return binary_content
+
+    @property
+    def text_content(self):
+        if self.binary_content:
+            encoding = self.encoding
+            if not encoding:
+                encoding = self.apparent_encoding
+            try:
+                content = str(self.binary_content, encoding, errors='replace')
+            except (LookupError, TypeError):
+                content = str(self.binary_content, errors='replace')
+        else:
+            content = None
+        return content
+
+    @property
+    def allowed_content_length(self):
+        """ Check if response has a valid length"""
+        content_length = self.headers.get("content-length")
+        if self.content_length_limit and content_length and int(content_length) > self.content_length_limit:
+            return False
+        return True
+
+
+def do_request(url=None, timeout=None, headers=None, content_length_limit=None):
+    if not url:
+        raise EmptyURL("Please pass a valid URL as the first argument.")
+    # raise invalid url exception for invalid URL
+    # taken from django https://github.com/django/django/blob/master/django/core/validators.py#L68
+    valid_url = re.compile(
+        r'^(https?://)?'  # scheme is validated separately
+        r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}(?<!-)\.?)|'  # domain...
+        r'localhost|'  # localhost...
+        r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|'  # ...or ipv4
+        r'\[?[A-F0-9]*:[A-F0-9:]+\]?)'  # ...or ipv6
+        r'(?::\d+)?'  # optional port
+        r'(?:/?|[/?]\S+)$', re.IGNORECASE)
+    if not valid_url.match(url):
+        raise InvalidURL("The URL is invalid.")
+
+    # if no schema add http as default
+    if not (url.startswith('http://') or url.startswith('https://')):
+        url = "http://" + url
+
+    try:
+        with requests.get(url, timeout=timeout, headers=headers, stream=True) as response:
+            if response.status_code == 404:
+                raise URLNotFound("The web page does not exist.")
+            return MaxLengthResponse(response, content_length_limit, origin_url=url)
+    except (ConnectionError, HTTPError, Timeout, TooManyRedirects):
+        raise URLUnreachable("The URL does not exist.")
+
+
 class PreviewBase(object):
     """
     Base for all web preview.
     """
-    def __init__(self, url = None, properties = None, timeout=None, headers=None, content=None, parser='html.parser'):
-        # if no first argument raise URL required exception
-        if not url:
-            raise EmptyURL("Please pass a valid URL as the first argument.")
-        # raise invalid url exception for invalid URL
-        # taken from django https://github.com/django/django/blob/master/django/core/validators.py#L68
-        valid_url = re.compile(
-            r'^(https?://)?'  # scheme is validated separately
-            r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}(?<!-)\.?)|'  # domain...
-            r'localhost|'  # localhost...
-            r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|'  # ...or ipv4
-            r'\[?[A-F0-9]*:[A-F0-9:]+\]?)'  # ...or ipv6
-            r'(?::\d+)?'  # optional port
-            r'(?:/?|[/?]\S+)$', re.IGNORECASE)
-        if not valid_url.match(url):
-            raise InvalidURL("The URL is invalid.")
-
-        # if no schema add http as default
-        try:
-            res = requests.get(url, timeout=timeout, headers=headers)
-        except (ConnectionError, HTTPError, Timeout, TooManyRedirects):
-            raise URLUnreachable("The URL does not exist.")
-        except MissingSchema: # if no schema add http as default
-            url = "http://" + url
-
-        # if content is provided don't fetch from url
+    def __init__(self, url=None, properties=None, timeout=None, headers=None, content=None, parser='html.parser', content_length_limit=None):
         if not content:
-            content = PreviewBase.get_content(url, timeout, headers)
+            response = do_request(url, timeout, headers, content_length_limit)
+            content = response.text_content
+            url = response.origin_url
+        if not content:
+            raise MissingContent('{} does not have a valid text content'.format(url))
 
         # its safe to assign the url
         self.url = url
@@ -50,25 +108,12 @@ class PreviewBase(object):
         self.properties = properties
         self._soup = BeautifulSoup(content, parser)
 
-    @staticmethod
-    def get_content(url, timeout, headers):
-        # throw URLUnreachable exception for just incase
-        try:
-            res = requests.get(url, timeout=timeout, headers=headers)
-        except (ConnectionError, HTTPError, Timeout, TooManyRedirects):
-            raise URLUnreachable("The URL is unreachable.")
-
-        if res.status_code == 404:
-            raise URLNotFound("The web page does not exist.")
-
-        return res.text
-
 class GenericPreview(PreviewBase):
     """
     Extracts title, description, image from a webpage's body instead of the meta tags.
     """
-    def __init__(self, url = None, properties = ['title', 'description', 'image'], timeout=None, headers=None, content=None, parser=None):
-        super(GenericPreview, self).__init__(url, properties, timeout=timeout, headers=headers, content=content, parser=parser)
+    def __init__(self, url=None, properties = ['title', 'description', 'image'], timeout=None, headers=None, content=None, parser=None, content_length_limit=None):
+        super(GenericPreview, self).__init__(url, properties, content=content, parser= parser)
         self.title = self._get_title()
         self.description = self._get_description()
         self.image = self._get_image()
@@ -183,22 +228,28 @@ class Schema(SocialPreviewBase):
         super(Schema, self).__init__(*args, **kwargs)
 
 
-def web_preview(url, timeout=None, headers=None, absolute_image_url=False, content=None, parser=None):
+def web_preview(url, timeout=None, headers=None, absolute_image_url=False, content=None, parser=None, content_length_limit=None):
     """
     Extract title, description and image from OpenGraph or TwitterCard or Schema or GenericPreview. Which ever returns first.
     """
-    og = OpenGraph(url, ['og:title', 'og:description', 'og:image'], timeout=timeout, headers=headers, content=content, parser=parser)
-    if og.title:
-        return og.title, og.description, process_image_url(url, og.image, absolute_image_url)
+    # if content is provided don't fetch from url
+    if not content:
+        response = do_request(url, timeout, headers, content_length_limit)
+        content = response.text_content
+    if content:
+        og = OpenGraph(properties=['og:title', 'og:description', 'og:image'],  content=content, parser=parser)
+        if og.title:
+            return og.title, og.description, process_image_url(url, og.image, absolute_image_url)
 
-    tc = TwitterCard(url, ['twitter:title', 'twitter:description', 'twitter:image'], timeout=timeout, headers=headers,
-                     content=content, parser=parser)
-    if tc.title:
-        return tc.title, tc.description, process_image_url(url, tc.image, absolute_image_url)
+        tc = TwitterCard(properties=['twitter:title', 'twitter:description', 'twitter:image'], content=content, parser=parser)
+        if tc.title:
+            return tc.title, tc.description, process_image_url(url, tc.image, absolute_image_url)
 
-    s = Schema(url, ['name', 'description', 'image'], timeout=timeout, headers=headers, content=content, parser=parser)
-    if s.name:
-        return s.name, s.description, process_image_url(url, s.image, absolute_image_url)
+        s = Schema(properties=['name', 'description', 'image'], content=content, parser=parser)
+        if s.name:
+            return s.name, s.description, process_image_url(url, s.image, absolute_image_url)
 
-    gp = GenericPreview(url, timeout=timeout, headers=headers, content=content, parser=parser)
-    return gp.title, gp.description, process_image_url(url, gp.image, absolute_image_url)
+        gp = GenericPreview(content=content, parser=parser)
+        return gp.title, gp.description, process_image_url(url, gp.image, absolute_image_url)
+    else:
+        return None, None, None

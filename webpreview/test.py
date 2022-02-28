@@ -212,6 +212,17 @@ class TestWebPreview(unittest.TestCase):
     """
     Test web_preview.
     """
+    def test_content_length_limit(self):
+        title, description, image = web_preview("http://localhost:8000/open-graph/available.html", content_length_limit=1)
+        self.assertEqual(title, None)
+        self.assertEqual(description, None)
+        self.assertEqual(image, None)
+
+        title, description, image = web_preview("http://localhost:8000/open-graph/available.html", content_length_limit=350)
+        self.assertEqual(title, 'a title')
+        self.assertEqual(description, None)
+        self.assertEqual(image, None)
+
     def test_extracts_title_via_open_graph(self):
         """
         """
