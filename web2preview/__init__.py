@@ -1,13 +1,13 @@
 from .previews import (
-    PreviewBase,
-    GenericPreview,
-    OpenGraph,
-    TwitterCard,
-    Schema,
-    web_preview,
-    webpreview,
+    # PreviewBase,
+    # GenericPreview,
+    # OpenGraph,
+    # TwitterCard,
+    # Schema,
+    # web_preview,
+    web2preview,
 )
-from .exceptions import (
+from .excepts import (
     WebpreviewException,
     EmptyURL,
     EmptyProperties,
@@ -21,7 +21,7 @@ __all__ = [
     "OpenGraph",
     "TwitterCard",
     "Schema",
-    "webpreview",
+    "web2preview",
     "web_preview",
     "WebpreviewException",
     "EmptyURL",

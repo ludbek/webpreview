@@ -1,306 +1,137 @@
-import re
-from urllib.parse import urlparse, urlunparse
-from typing import Dict, List, Optional, Tuple
+"""Previews module.
 
-import requests
-from requests.exceptions import *
-from bs4 import BeautifulSoup
+Compatibility layer with original webpreview library.
+"""
 
-from .exceptions import *
+from .excepts import *
+from .parsers import *
+from .models import WebPreview
+from .previews import web2preview
 
 
-class PreviewBase:
-    """Base for all web preview."""
+class PreviewBase(WebPreview):
+    """
+    Base for all compatibility web previews.
+    """
 
     def __init__(
         self,
-        url: str,
-        properties: List[str] = [],
-        timeout: Optional[str] = None,
+        url: Optional[str] = None,
+        properties: Optional[List[str]] = None,
+        timeout: Optional[int] = None,
         headers: Optional[Dict[str, str]] = None,
         content: Optional[str] = None,
         parser: str = "html.parser",
-    ) -> None:
-        self.title: Optional[str] = None
-        self.description: Optional[str] = None
-        self.image: Optional[str] = None
-        self.name: Optional[str] = None
-
-        # if no first argument raise URL required exception
-        if not url:
-            raise EmptyURL("Please pass a valid URL as the first argument.")
-
-        scheme, netloc, _, _, _, _ = urlparse(url)
-
-        # if no schema add http as default
-        if not netloc:
-            raise URLUnreachable("The URL does not exist.")
-
-        if not scheme:
-            scheme = "http"
-
-        # if content is provided don't fetch from url
-        if not content:
-            content = PreviewBase.get_content(url, timeout, headers)
-
-        # its safe to assign the url
-        self.url = url
-
+    ):
         if not properties:
             raise EmptyProperties("Please pass list of properties to be extracted.")
 
-        # its safe to assign properties
+        _, _, soup = initialize(url, timeout, headers, content, None, properties, parser)
+
+        # These two properties below are for compatibility with these old classes from webpreview
         self.properties = properties
-        self._soup = BeautifulSoup(content, parser)
-
-    @staticmethod
-    def get_content(
-        url: str, timeout: Optional[int] = None, headers: Optional[Dict[str, str]] = None
-    ) -> str:
-        try:
-            res = requests.get(url, timeout=timeout, headers=headers)
-        except (ConnectionError, HTTPError, Timeout, TooManyRedirects):
-            raise URLUnreachable("The URL is unreachable.")
-
-        if res.status_code == 404:
-            raise URLNotFound("The web page does not exist.")
-
-        return res.text
+        self._soup = soup
 
 
 class GenericPreview(PreviewBase):
-    """Extracts title, description, image from a webpage's body instead of the meta tags."""
+    """
+    Extracts title, description, image from a webpage's body instead of the meta tags.
+    """
 
     def __init__(
         self,
-        url: str,
-        properties: List[str] = ["title", "description", "image"],
-        timeout: Optional[str] = None,
+        url: Optional[str] = None,
+        properties: Optional[List[str]] = ["title", "description", "image"],
+        timeout: Optional[int] = None,
         headers: Optional[Dict[str, str]] = None,
         content: Optional[str] = None,
         parser: str = "html.parser",
-    ) -> None:
-        super(GenericPreview, self).__init__(
-            url=url,
-            properties=properties,
-            timeout=timeout,
-            headers=headers,
-            content=content,
-            parser=parser,
-        )
-        self.title = self._get_title()
-        self.description = self._get_description()
-        self.image = self._get_image()
-
-    def _get_title(self) -> Optional[str]:
-        """Extract title from the given web page."""
-
-        soup = self._soup
-        # if title tag is present and has text in it, return it as the title
-        if soup.title and soup.title.text:
-            return soup.title.text
-
-        # else if h1 tag is present and has text in it, return it as the title
-        if soup.h1 and soup.h1.text:
-            return soup.h1.text
-
-        # if no title, h1 return None
-        return None
-
-    def _get_description(self) -> Optional[str]:
-        """Extract description from the given web page."""
-
-        soup = self._soup
-        # extract description from meta[name='description']
-        meta_description = soup.find("meta", attrs={"name": "description"})
-        if meta_description and meta_description["content"]:
-            return meta_description["content"]
-
-        # else extract description from the first <p> sibling to the first <h1>
-        first_h1 = soup.find("h1")
-        if first_h1:
-            first_p = first_h1.find_next("p")
-            if first_p and first_p.string:
-                return first_p.text
-
-        # else extract description from the first <p>
-        first_p = soup.find("p")
-        if first_p and first_p.string:
-            return first_p.string
-
-        # else
-        return None
-
-    def _get_image(self) -> Optional[str]:
-        """Extract preview image from the given web page."""
-
-        soup = self._soup
-        # extract the first image which is sibling to the first h1
-        first_h1 = soup.find("h1")
-        if first_h1:
-            first_image = first_h1.find_next_sibling("img")
-            if first_image and first_image["src"]:
-                return first_image["src"]
-
-        return None
+    ):
+        super().__init__(url, properties, timeout, headers, content, parser)
+        preview = parse_generic(self._soup, self.url)
+        self.merge(preview)
 
 
 class SocialPreviewBase(PreviewBase):
-    """Abstract class for OpenGraph, TwitterCard and Google+."""
+    """
+    Abstract class for OpenGraph, TwitterCard and Google+.
+    """
 
     def __init__(
         self,
-        url: str,
-        target_attribute: str,
-        properties: List[str] = [],
-        timeout: Optional[str] = None,
+        url: Optional[str] = None,
+        properties: Optional[List[str]] = None,
+        timeout: Optional[int] = None,
         headers: Optional[Dict[str, str]] = None,
         content: Optional[str] = None,
         parser: str = "html.parser",
-    ) -> None:
-        # Different subtypes have different target_attribute:
-        # - OpengGraph has <meta property="" content="">
-        # - TwitterCard  has <meta name="" content="">
-        # - Google+  has <meta itemprop="" content="">
-        self._target_attribute = target_attribute
-        super().__init__(
-            url=url,
-            properties=properties,
-            timeout=timeout,
-            headers=headers,
-            content=content,
-            parser=parser,
-        )
-
-        soup = self._soup
-        for property in self.properties:
-            property_meta = soup.find("meta", attrs={self._target_attribute: property})
-
-            # turn "og:title" to "title" and "og:price:amount" to price_amount
-            if re.search(r":", property):
-                new_property = property.split(":", 1)[1].replace(":", "_")
-
-            # turn "camelCase" to "camel_case"
-            elif re.search(r"[A-Z]", property):
-                # regex taken from 2nd answer at
-                # http://stackoverflow.com/questions/1175208/elegant-python-function-to-convert-camelcase-to-camel-case
-                new_property = re.sub("(?!^)([A-Z]+)", r"_\1", property).lower()
-            else:
-                new_property = property
-
-            if property_meta and property_meta["content"]:
-                # dynamically attach property to instance
-                self.__dict__[new_property] = property_meta["content"]
-            else:
-                self.__dict__[new_property] = None
+        target_attribute: str = "property",
+    ):
+        super().__init__(url, properties, timeout, headers, content, parser)
+        preview = parse_meta(self._soup, self.url, target_attribute, properties)
+        self.merge(preview)
 
 
 class OpenGraph(SocialPreviewBase):
-    """Gets OpenGraph meta properties of a webpage."""
+    """
+    Gets OpenGraph meta properties of a webpage.
+    """
 
     def __init__(
         self,
-        url: str,
-        properties: List[str] = ["og:title", "og:description", "og:image"],
-        timeout: Optional[str] = None,
+        url: Optional[str] = None,
+        properties: Optional[List[str]] = None,
+        timeout: Optional[int] = None,
         headers: Optional[Dict[str, str]] = None,
         content: Optional[str] = None,
         parser: str = "html.parser",
-    ) -> None:
-        super().__init__(
-            url=url,
-            target_attribute="property",
-            properties=properties,
-            timeout=timeout,
-            headers=headers,
-            content=content,
-            parser=parser,
-        )
+    ):
+        super().__init__(url, properties, timeout, headers, content, parser)
+        preview = parse_open_graph(self._soup, self.url)
+        self.merge(preview)
 
 
 class TwitterCard(SocialPreviewBase):
-    """Gets TwitterCard meta properties of a webpage."""
+    """
+    Gets TwitterCard meta properties of a webpage.
+    """
 
     def __init__(
         self,
-        url: str,
-        properties: List[str] = ["twitter:title", "twitter:description", "twitter:image"],
-        timeout: Optional[str] = None,
+        url: Optional[str] = None,
+        properties: Optional[List[str]] = None,
+        timeout: Optional[int] = None,
         headers: Optional[Dict[str, str]] = None,
         content: Optional[str] = None,
         parser: str = "html.parser",
-    ) -> None:
-        super().__init__(
-            url=url,
-            target_attribute="name",
-            properties=properties,
-            timeout=timeout,
-            headers=headers,
-            content=content,
-            parser=parser,
-        )
+    ):
+        super().__init__(url, properties, timeout, headers, content, parser)
+        preview = parse_twitter_card(self._soup, self.url)
+        self.merge(preview)
 
 
 class Schema(SocialPreviewBase):
-    """Gets Schema meta properties from a website."""
+    """
+    Gets Schema meta properties from a website.
+    """
 
     def __init__(
         self,
-        url: str,
-        properties: List[str] = ["name", "description", "image"],
-        timeout: Optional[str] = None,
+        url: Optional[str] = None,
+        properties: Optional[List[str]] = None,
+        timeout: Optional[int] = None,
         headers: Optional[Dict[str, str]] = None,
         content: Optional[str] = None,
         parser: str = "html.parser",
-    ) -> None:
-        super().__init__(
-            url=url,
-            target_attribute="itemprop",
-            properties=properties,
-            timeout=timeout,
-            headers=headers,
-            content=content,
-            parser=parser,
-        )
-
-
-def webpreview(
-    url: str,
-    timeout: Optional[str] = None,
-    headers: Optional[Dict[str, str]] = None,
-    content: Optional[str] = None,
-    parser: str = "html.parser",
-    absolute_image_url: bool = False,
-) -> PreviewBase:
-    """Extract title, description and image from OpenGraph or TwitterCard or Schema or GenericPreview.
-
-    Returns Preview object.
-    """
-
-    og = OpenGraph(url=url, timeout=timeout, headers=headers, content=content, parser=parser)
-    if og.title:
-        og.image = process_image_url(url, og.image, absolute_image_url)
-        return og
-
-    tc = TwitterCard(url=url, timeout=timeout, headers=headers, content=content, parser=parser)
-    if tc.title:
-        tc.image = process_image_url(url, tc.image, absolute_image_url)
-        return tc
-
-    s = Schema(url=url, timeout=timeout, headers=headers, content=content, parser=parser)
-    if s.name:
-        s.image = process_image_url(url, s.image, absolute_image_url)
-        s.title = s.name
-        return s
-
-    gp = GenericPreview(url=url, timeout=timeout, headers=headers, content=content, parser=parser)
-    gp.image = process_image_url(url, gp.image, absolute_image_url)
-    return gp
+    ):
+        super().__init__(url, properties, timeout, headers, content, parser)
+        preview = parse_schema(self._soup, self.url)
+        self.merge(preview)
 
 
 def web_preview(
-    url: str,
-    timeout: Optional[str] = None,
+    url: Optional[str] = None,
+    timeout: Optional[int] = None,
     headers: Optional[Dict[str, str]] = None,
     content: Optional[str] = None,
     parser: str = "html.parser",
@@ -308,53 +139,28 @@ def web_preview(
 ) -> Tuple[Optional[str], Optional[str], Optional[str]]:
     """Extract title, description and image from OpenGraph or TwitterCard or Schema or GenericPreview.
 
-    Returns a tuple of title, description, and image url.
+    This function is maintained for compatibility purposes with ``webpreview`` library and is simply
+    a wrapper around the newer ``web2preview`` function.
+    For direct and convenient access to the parsing results through the ``WebPreview`` object
+    use the newer ``web2preview`` function.
+
+    Args:
+        url (str): URL of the page. If content is supplied, the URL will not be
+            requested but can still be used to convert relative URLs of the image
+            to absolute one.
+        timeout (int): Timeout in seconds for requests library to wait before throwing
+            a timeout exception when requesting the page's source.
+        headers (dict): Request headers to pass to the requests library.
+        content (str): Page's content. When given, no request will be made to retrieve
+            the source and instead the supplied content will be used.
+        parser (str): Which parser type to give to BeautifulSoup library. Allowed values
+            are "html.parser", "lxml", "html5lib". Note all of them except for "html.parser"
+            require additional dependencies. Defaults to "html.parser".
+        absolute_image_url (bool): Convert preview image URL to absolute URL. Defaults to False.
+
+    Returns:
+        Tuple of 3 strings: title, description, image all of which can be None.
     """
 
-    p = webpreview(
-        url=url,
-        timeout=timeout,
-        headers=headers,
-        content=content,
-        parser=parser,
-        absolute_image_url=absolute_image_url,
-    )
-    return p.title, p.description, p.image
-
-
-def process_image_url(
-    url: str, image_url: str, force_absolute_url: bool = False
-) -> Optional[str]:
-    # Empty Image URLs are returned as is
-    if not image_url:
-        return image_url
-
-    if not force_absolute_url:
-        return image_url
-
-    parsed_url = urlparse(url)
-    parsed_image_url = urlparse(image_url)
-
-    # If the image URL is not absolute, then we append its
-    # path, params, query, and fragment to the scheme + netloc
-    # of the base url
-    if not parsed_image_url.netloc:
-        url_components = [
-            parsed_url.scheme,
-            parsed_url.netloc,
-            parsed_image_url.path,
-            parsed_image_url.params,
-            parsed_image_url.query,
-            parsed_image_url.fragment,
-        ]
-    else:
-        url_components = [
-            parsed_image_url.scheme or "http",
-            parsed_image_url.netloc,
-            parsed_image_url.path,
-            parsed_image_url.params,
-            parsed_image_url.query,
-            parsed_image_url.fragment,
-        ]
-
-    return urlunparse(url_components)
+    preview = web2preview(url, timeout, headers, content, None, None, parser, absolute_image_url)
+    return preview.title, preview.description, preview.image

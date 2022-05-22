@@ -14,6 +14,14 @@ class EmptyURL(WebpreviewException):
     pass
 
 
+class EmptyContent(WebpreviewException):
+    """
+    WebpreviewException for empty page content.
+    """
+
+    pass
+
+
 class EmptyProperties(WebpreviewException):
     """
     WebpreviewException for empty properties.
