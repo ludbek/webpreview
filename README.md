@@ -4,16 +4,17 @@ For a given URL `web2preview` extracts its **title**, **description**, and **ima
 [Open Graph](http://ogp.me/), [Twitter Card](https://dev.twitter.com/cards/overview), or
 [Schema](http://schema.org/) meta tags, or, as an alternative, parses it as a generic webpage.
 
-This is a fork of an excellent [webpreview] library and it maintains **absolute** compatibility
-with the original while fixing several bugs, enchancing parsing, and adding new convenient APIs.
+This is a **fork** of an excellent [webpreview] library and it maintains **complete and absolute**
+compatibility with the original while fixing several bugs, enhancing parsing, and adding a new
+convenient APIs.
 
 *Main differences between `web2preview` and `webpreview`*:
 
 * Enhanced parsing for generic web pages
 * No unnecessary `GET` request is ever made if `content` of the page is supplied
-* Full fallback mechanism which continues to parse until all methods are exhausted
-* Python Typings are added across entire library (**better syntax highlighting**)
-* New dict-like `WebPreview` result object makes it easier to use parsing results
+* Complete fallback mechanism which continues to parse until all methods are exhausted
+* Python Typings are added across the entire library (**better syntax highlighting**)
+* New dict-like `WebPreview` result object makes it easier to read parsing results
 * Command-line utility to extract title, description, and image from URL
 
 ## Installation
@@ -26,8 +27,8 @@ pip install web2preview
 
 Use the generic `web2preview` method to parse the page independent of its nature.
 It tries to extract the values from Open Graph properties, then it falls back to
-Twitter Card format, then Schema. If none of them manage to extract all of title,
-description, and preview image, then the webpage's content is parsed using a generic
+Twitter Card format, then Schema. If none of them can extract all three of the title,
+description, and preview image, then webpage's content is parsed using a generic
 extractor.
 
 ```python
@@ -41,11 +42,11 @@ extractor.
 >>> p.image
 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Enrico_Fermi_1943-49.jpg/1200px-Enrico_Fermi_1943-49.jpg'
 
-# Access the parsed fields both as attributes or items
+# Access the parsed fields both as attributes and items
 >>> p["url"] == p.url
 True
 
-# Check if all of the title, description, and image are contained within the parsing result
+# Check if all three of the title, description, and image are in the parsing result
 >>> p.is_complete()
 True
 
@@ -63,7 +64,7 @@ True
 </html>
 """
 
-# This function call won't make any external requests library calls,
+# This function call won't make any external calls,
 # only relying on the supplied content, unlike the example above
 >>> web2preview("aa.com", content=content)
 WebPreview(url="http://aa.com", title="The Dormouse's story", description="A Mad Tea-Party story")
@@ -71,7 +72,7 @@ WebPreview(url="http://aa.com", title="The Dormouse's story", description="A Mad
 
 ### Using the command line
 
-When `web2preview` is installed via pip the accompanying command-line tool gets intalled alongside.
+When `web2preview` is installed via `pip` the accompanying command-line tool is intalled alongside.
 
 ```shell
 $ web2preview https://en.wikipedia.org/wiki/Enrico_Fermi
@@ -88,6 +89,9 @@ image: https://github.githubassets.com/images/modules/site/social-cards/github-s
 *Note*: For the Original [webpreview] API please check the [official docs][webpreview].
 
 ## Run with Docker
+
+The docker image can be built and ran similarly to the command line.
+The default entry point is the `web2preview` command-line function.
 
 ```shell
 $ docker build -t web2preview .
