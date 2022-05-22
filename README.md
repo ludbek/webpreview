@@ -4,6 +4,18 @@ For a given URL `web2preview` extracts its **title**, **description**, and **ima
 [Open Graph](http://ogp.me/), [Twitter Card](https://dev.twitter.com/cards/overview), or
 [Schema](http://schema.org/) meta tags, or, as an alternative, parses it as a generic webpage.
 
+This is a fork of an excellent [webpreview] library and it maintains **absolute** compatibility
+with the original while fixing several bugs, enchancing parsing, and adding new convenient APIs.
+
+*Main differences between `web2preview` and `webpreview`*:
+
+* Enhanced parsing for generic web pages
+* No unnecessary `GET` request is ever made if `content` of the page is supplied
+* Full fallback mechanism which continues to parse until all methods are exhausted
+* Python Typings are added across entire library (**better syntax highlighting**)
+* New dict-like `WebPreview` result object makes it easier to use parsing results
+* Command-line utility to extract title, description, and image from URL
+
 ## Installation
 
 ```shell
@@ -12,93 +24,79 @@ pip install web2preview
 
 ## Usage
 
-The library retrieves the contents of webpage by making a `GET` request using `requests` library.
-
-There are two main helper functions that can be used to do that `webpreview` and `web_preview`.
-
-
-### Generic WebPage Preview
-
-Use `web_preview` for extracting title, description and thumbnail image. It tries to extract them from Open Graph properties, if not found it falls back to Twitter Card, and so on  till Schema.  If non works it tries to extract from the webpage's content.
+Use the generic `web2preview` method to parse the page independent of its nature.
+It tries to extract the values from Open Graph properties, then it falls back to
+Twitter Card format, then Schema. If none of them manage to extract all of title,
+description, and preview image, then the webpage's content is parsed using a generic
+extractor.
 
 ```python
-from web2preview import web_preview
-title, description, image = web_preview("aurl.com")
+>>> from web2preview import web2preview
 
-# specifing timeout or headers which gets passed to requests.get()
-headers = {'User-Agent': 'Mozilla/5.0'}
-title, description, image = web_preview("a_slow_url.com", timeout=1000, headers=headers)
+>>> p = web2preview("https://en.wikipedia.org/wiki/Enrico_Fermi")
+>>> p.title
+'Enrico Fermi - Wikipedia'
+>>> p.description
+'Italian-American physicist (1901–1954)'
+>>> p.image
+'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Enrico_Fermi_1943-49.jpg/1200px-Enrico_Fermi_1943-49.jpg'
 
-# pass html content thus avoiding making http call again to fetch content.
-content = """<html><head><title>Dummy HTML</title></head></html>"""
-title, description, image = web_preview("aurl.com", content=content)
+# Access the parsed fields both as attributes or items
+>>> p["url"] == p.url
+True
 
-# specifing the parser
-# by default webpreview uses 'html.parser'
-title, description, image = web_preview("aurl.com", content=content, parser='lxml')
+# Check if all of the title, description, and image are contained within the parsing result
+>>> p.is_complete()
+True
+
+# Provide page content from somewhere else
+>>> content = """
+<html>
+    <head>
+        <title>The Dormouse's story</title>
+        <meta property="og:description" content="A Mad Tea-Party story" />
+    </head>
+    <body>
+        <p class="title"><b>The Dormouse's story</b></p>
+        <a href="http://example.com/elsie" class="sister" id="link1">Elsie</a>
+    </body>
+</html>
+"""
+
+# This function call won't make any external requests library calls,
+# only relying on the supplied content, unlike the example above
+>>> web2preview("aa.com", content=content)
+WebPreview(url="http://aa.com", title="The Dormouse's story", description="A Mad Tea-Party story")
 ```
 
-### Open Graph
+### Using the command line
 
-`OpenGraph` extracts Open Graph meta properties. Consider following meta tags.
+When `web2preview` is installed via pip the accompanying command-line tool gets intalled alongside.
 
-```html
-<!--doc snippet at aurl.com -->
-<meta property="og:title" content="a title" />
-<meta property="og:description" content="a description" />
-<meta property="article:published_time" content="2013-09-17T05:59:00+01:00" />
-<meta property="og:price:amount" content="15.00" />
+```shell
+$ web2preview https://en.wikipedia.org/wiki/Enrico_Fermi
+title: Enrico Fermi - Wikipedia
+description: Italian-American physicist (1901–1954)
+image: https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Enrico_Fermi_1943-49.jpg/1200px-Enrico_Fermi_1943-49.jpg
+
+$ web2preview https://github.com/ --absolute-url
+title: GitHub: Where the world builds software
+description: GitHub is where over 83 million developers shape the future of software, together.
+image: https://github.githubassets.com/images/modules/site/social-cards/github-social.png
 ```
 
-Below is a snippet showing its usage.
-
-```python
-$ from webpreview import OpenGraph
-
-# pass a URL and a list of meta properties
-$ og = OpenGraph("http://aurl.com", ["og:title", "article:published_time", "og:price:amount"])
-
-# OpenGraph dynamically assigns corresponding properties to its instance. As you will see it excludes `og:` from the supplied properties.
-$ og.title
-=> "a title"
-$ og.published_time
-=> "2013-09-17T05:59:00+01:00"
-
-# It converts `:` in a property into `_`.
-$ og.price_amount
-=> "15.00"
-```
-
-### Twitter Card
-
-`TwitterCard` extracts Twitter Card meta properties from the given webpage. Its usage is similar to `OpenGraph`.
-
-```python
-$ from webpreview import TwitterCard
-$ tc = TwitterCard("aurl.com", ["twitter:title", "twitter:image"])
-$ tc.title
-$ tc.image
-```
-
-### Schema
-
-Webpreview supports Schema through the class `Schema`. Right now it extracts properties in meta tags only.
-
-```python
-$ from webpreview import Schema
-$ aschema = Schema("aurl.com", ["name", "camelCaseProperty"]
-$ aschema.name
-# It makes Camel Case properties available as Snake Case.
-$ aschema.camel_case_property
-```
+*Note*: For the Original [webpreview] API please check the [official docs][webpreview].
 
 ## Run with Docker
 
 ```shell
-docker build -t web2preview .
-docker run -it --rm web2preview "https://en.m.wikipedia.org/wiki/Enrico_Fermi"
+$ docker build -t web2preview .
+$ docker run -it --rm web2preview "https://en.m.wikipedia.org/wiki/Enrico_Fermi"
+title: Enrico Fermi - Wikipedia
+description: Enrico Fermi (Italian: [enˈriːko ˈfermi]; 29 September 1901 – 28 November 1954) was an Italian (later naturalized American) physicist and the creator of the world's first nuclear reactor, the Chicago Pile-1. He has been called the "architect of the nuclear age"[1] and the "architect of the atomic bomb".
+image: https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Enrico_Fermi_1943-49.jpg/1200px-Enrico_Fermi_1943-49.jpg
 ```
 
-### Run your script
+*Note*: built docker image weighs around 210MB.
 
-    $ docker run -it --rm --name my-script -v "$PWD":/usr/src/myapp -w /usr/src/myapp webpreview python your-script.py
+[webpreview]: https://github.com/ludbek/webpreview

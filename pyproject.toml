@@ -12,7 +12,7 @@ repository = "https://github.com/vduseev/web2preview"
 documentation = "https://github.com/vduseev/web2preview"
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.8"
 requests = "^2.27.1"
 beautifulsoup4 = "^4.11.1"
 
@@ -20,6 +20,7 @@ beautifulsoup4 = "^4.11.1"
 black = "^22.3.0"
 pytest = "^7.1.2"
 tox = "^3.25.0"
+ipython = "^8.3.0"
 
 [tool.poetry.scripts]
 web2preview = "web2preview.cli:main"
