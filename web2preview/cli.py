@@ -15,10 +15,16 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    title, description, image = web2preview(
+    preview = web2preview(
         url=args.url,
         timeout=args.timeout,
-        absolute_image_url=args.absolute_url,
+        absolute_url=args.absolute_url,
     )
 
-    print((f"title: {title}\n" f"description: {description}\n" f"image: {image}"))
+    print(
+        (
+            f"title: {preview.title}\n"
+            f"description: {preview.description}\n"
+            f"image: {preview.image}"
+        )
+    )

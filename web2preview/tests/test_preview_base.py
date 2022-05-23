@@ -15,8 +15,8 @@ def test_instance_gets_valid_url():
     """
     PreviewBase: Test instance gets the valid url being passed.
     """
-    aurl = "http://validurl.com"
-    apreview = PreviewBase(aurl, properties=["title"])
+    aurl = "http://localhost:8000/"
+    apreview = PreviewBase(aurl, properties=["title"], timeout=1)
     assert apreview.url == aurl
 
 
@@ -31,46 +31,33 @@ def test_url_without_schema_gets_http_appended():
 
 
 def test_properties_is_added_to_instance():
-
     """
     PreviewBase: Test if passed "properties" are added to the instance.
     """
     apreview = PreviewBase("http://localhost:8000/", ["title", "author"])
-    self.assertEqual(apreview.properties, ["title", "author"])
+    assert apreview.properties == ["title", "author"]
 
 
 def test_dns_errors():
     """
     PreviewBase: Test if DNS errors can be caught.
     """
-    try:
-        PreviewBase("http://thisurldoesnotexists7352356.urlz", ["title"])
-    except URLUnreachable as e:
-        self.assertEqual(URLUnreachable, type(e))
-        return
-    self.fail("Should throw the DNS error.")
+    with pytest.raises(URLUnreachable):
+        PreviewBase("http://thisurldoesnotexists7352356.urlz", ["title"], timeout=1)
 
 
 def test_url_exists():
     """
     PreviewBase: Test if URL exists.
     """
-    try:
-        PreviewBase("http://localhost:8000/thisdoesnotexists7")
-    except URLNotFound as e:
-        self.assertEqual(URLNotFound, type(e))
-        return
-    self.fail("Should throw the 404 error.")
+    with pytest.raises(URLNotFound):
+        PreviewBase("http://localhost:8000/thisdoesnotexists7", timeout=1)
 
 
-def test_complains_about_empty_property_list(self):
+def test_complains_about_empty_property_list():
     """
     PreviewBase complains about empty property list.
     """
-    try:
+    with pytest.raises(EmptyProperties):
         PreviewBase("http://localhost:8000")
         PreviewBase("http://localhost:8000", [])
-    except EmptyProperties as e:
-        self.assertEqual(EmptyProperties, type(e))
-        return
-    self.fail("Should should complain about empty property list.")

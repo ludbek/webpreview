@@ -22,4 +22,4 @@ def test_unavailable_empty_properties_get_none():
         properties=["og:title", "og:price:amount"],
     )
     assert ogpreview.title is None
-    assert ogpreview.price_amount is None
+    assert "price_amount" not in ogpreview

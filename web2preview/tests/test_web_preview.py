@@ -1,28 +1,33 @@
-def test_extracts_title_via_open_graph(self):
+from urllib.parse import urlparse
+
+from web2preview import *
+
+
+def test_extracts_title_via_open_graph():
     """ """
     title, description, image = web_preview("http://localhost:8000/open-graph/available.html")
-    self.assertEqual(title, "a title")
+    assert title == "a title"
 
 
-def test_extracts_title_via_twitter_card(self):
+def test_extracts_title_via_twitter_card():
     """ """
     title, description, image = web_preview("http://localhost:8000/twitter-card/available.html")
-    self.assertEqual(title, "a title")
+    assert title == "a title"
 
 
-def test_extracts_title_via_schema(self):
+def test_extracts_title_via_schema():
     """ """
     title, description, image = web_preview("http://localhost:8000/schema/available.html")
-    self.assertEqual(title, "a title")
+    assert title == "a title"
 
 
-def test_extracts_description_via_generic_preview(self):
+def test_extracts_description_via_generic_preview():
     """ """
     title, description, image = web_preview("http://localhost:8000/generic-preview/h1-p-desc.html")
-    self.assertEqual(description, "This is valid description.")
+    assert description == "This is valid description."
 
 
-def test_relative_image_path_returns_absolute_path_via_open_graph(self):
+def test_relative_image_path_returns_absolute_path_via_open_graph():
     """
     When a relative image path is found, the full absolute path is returned if the flag is True.
     """
@@ -30,10 +35,10 @@ def test_relative_image_path_returns_absolute_path_via_open_graph(self):
     title, description, image = web_preview(url, absolute_image_url=True)
     scheme, netloc, path, params, query, fragment = urlparse(url)
     base_url = "{}://{}".format(scheme, netloc)
-    self.assertTrue(image.startswith(base_url))
+    assert image.startswith(base_url)
 
 
-def test_relative_image_path_returns_absolute_path_via_twitter_card(self):
+def test_relative_image_path_returns_absolute_path_via_twitter_card():
     """
     When a relative image path is found, the full absolute path is returned if the flag is True.
     """
@@ -41,10 +46,10 @@ def test_relative_image_path_returns_absolute_path_via_twitter_card(self):
     title, description, image = web_preview(url, absolute_image_url=True)
     scheme, netloc, path, params, query, fragment = urlparse(url)
     base_url = "{}://{}".format(scheme, netloc)
-    self.assertTrue(image.startswith(base_url))
+    assert image.startswith(base_url)
 
 
-def test_relative_image_path_returns_absolute_path_via_schema(self):
+def test_relative_image_path_returns_absolute_path_via_schema():
     """
     When a relative image path is found, the full absolute path is returned if the flag is True.
     """
@@ -52,10 +57,10 @@ def test_relative_image_path_returns_absolute_path_via_schema(self):
     title, description, image = web_preview(url, absolute_image_url=True)
     scheme, netloc, path, params, query, fragment = urlparse(url)
     base_url = "{}://{}".format(scheme, netloc)
-    self.assertTrue(image.startswith(base_url))
+    assert image.startswith(base_url)
 
 
-def test_relative_image_path_returns_absolute_path_via_generic_preview(self):
+def test_relative_image_path_returns_absolute_path_via_generic_preview():
     """
     When a relative image path is found, the full absolute path is returned if the flag is True.
     """
@@ -63,4 +68,4 @@ def test_relative_image_path_returns_absolute_path_via_generic_preview(self):
     title, description, image = web_preview(url, absolute_image_url=True)
     scheme, netloc, path, params, query, fragment = urlparse(url)
     base_url = "{}://{}".format(scheme, netloc)
-    self.assertTrue(image.startswith(base_url))
+    assert image.startswith(base_url)

@@ -29,7 +29,7 @@ def extract_description(soup: BeautifulSoup) -> Optional[str]:
 
     def treat_candidate(candidate_text: str) -> str:
         text = candidate_text.strip()
-        parts = [p.strip() for p in text.split(".")]
+        parts = [p.strip().rstrip(".") for p in text.split(".") if p.strip().rstrip(".")]
         desc = ". ".join(parts[:2]) + "."
         return desc
 
@@ -176,11 +176,11 @@ def initialize(
     host_re = "(" + hostname_re + domain_re + tld_re + "|localhost)"
 
     valid_url = re.compile(
-        r"^(?P<scheme>https://)?"  # scheme is validated separately
+        r"^(?P<scheme>https?://)?"  # scheme is validated separately
         r"(?P<user>[^\s:@/]+(?P<pass>:[^\s:@/]*)?@)?"  # user:pass authentication
         r"(?P<domain>" + ipv4_re + "|" + ipv6_re + "|" + host_re + ")"  # domain
         r"(?P<port>:[0-9]{1,5})?"  # port
-        r"(?P<rest>/?|[/?]\S+)$",
+        r"(?P<rest>/?|[/?]\S+)?$",
         re.IGNORECASE,
     )
 
@@ -235,22 +235,39 @@ def parse_meta(
     return result
 
 
-def parse_open_graph(soup: BeautifulSoup, url: str, absolute_url: bool = False) -> WebPreview:
-    result = parse_meta(
-        soup, url, "property", ["og:title", "og:description", "og:image"], absolute_url
-    )
+def parse_open_graph(
+    soup: BeautifulSoup,
+    url: str,
+    properties: Optional[List[str]] = None,
+    absolute_url: bool = False,
+) -> WebPreview:
+    if not properties:
+        properties = ["og:title", "og:description", "og:image"]
+    result = parse_meta(soup, url, "property", properties, absolute_url)
     return result
 
 
-def parse_twitter_card(soup: BeautifulSoup, url: str, absolute_url: bool = False) -> WebPreview:
-    result = parse_meta(
-        soup, url, "name", ["twitter:title", "twitter:description", "twitter:image"], absolute_url
-    )
+def parse_twitter_card(
+    soup: BeautifulSoup,
+    url: str,
+    properties: Optional[List[str]] = None,
+    absolute_url: bool = False,
+) -> WebPreview:
+    if not properties:
+        properties = ["twitter:title", "twitter:description", "twitter:image"]
+    result = parse_meta(soup, url, "name", properties, absolute_url)
     return result
 
 
-def parse_schema(soup: BeautifulSoup, url: str, absolute_url: bool = False) -> WebPreview:
-    result = parse_meta(soup, url, "itemprop", ["name", "description", "image"], absolute_url)
+def parse_schema(
+    soup: BeautifulSoup,
+    url: str,
+    properties: Optional[List[str]] = None,
+    absolute_url: bool = False,
+) -> WebPreview:
+    if not properties:
+        properties = ["name", "description", "image"]
+    result = parse_meta(soup, url, "itemprop", properties, absolute_url)
     if result.name:
         result["title"] = result.name
     return result
@@ -309,19 +326,19 @@ def web2preview(
             return result
 
     # Try to extract standard OpenGraph meta properties
-    open_graph = parse_open_graph(soup, url, absolute_url)
+    open_graph = parse_open_graph(soup, url, properties, absolute_url)
     result.merge(open_graph)
     if result.is_complete():
         return result
 
     # Try to extract Twitter Card properties
-    twitter_card = parse_twitter_card(soup, url, absolute_url)
+    twitter_card = parse_twitter_card(soup, url, properties, absolute_url)
     result.merge(twitter_card)
     if result.is_complete():
         return result
 
     # Try to extract Schema properties
-    schema = parse_schema(soup, url, absolute_url)
+    schema = parse_schema(soup, url, properties, absolute_url)
     result.merge(schema)
     if result.is_complete():
         return result

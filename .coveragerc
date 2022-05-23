@@ -1,0 +1,20 @@
+[run]
+branch = True
+source = web2preview
+
+omit =
+    # Omit test files
+    web2preview/tests/*
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    if self.debug:
+    if settings.DEBUG
+    raise AssertionError
+    raise NotImplementedError
+    if 0:
+    if __name__ == .__main__.:
+
+fail_under = 80

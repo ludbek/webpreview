@@ -22,13 +22,29 @@ class PreviewBase(WebPreview):
         headers: Optional[Dict[str, str]] = None,
         content: Optional[str] = None,
         parser: str = "html.parser",
+        target_attribute: str = "property",
     ):
+        if not url:
+            raise EmptyURL("Please pass a valid URL as the first argument.")
+
+        _url, _, soup = initialize(
+            url, timeout, headers, content, target_attribute, properties, parser
+        )
+
         if not properties:
             raise EmptyProperties("Please pass list of properties to be extracted.")
 
-        _, _, soup = initialize(url, timeout, headers, content, None, properties, parser)
+        super().__init__(
+            url=url,
+            properties=properties,
+            timeout=timeout,
+            headers=headers,
+            content=content,
+            parser=parser,
+        )
 
         # These two properties below are for compatibility with these old classes from webpreview
+        self.url = _url
         self.properties = properties
         self._soup = soup
 
@@ -87,7 +103,7 @@ class OpenGraph(SocialPreviewBase):
         parser: str = "html.parser",
     ):
         super().__init__(url, properties, timeout, headers, content, parser)
-        preview = parse_open_graph(self._soup, self.url)
+        preview = parse_open_graph(self._soup, self.url, properties)
         self.merge(preview)
 
 
@@ -106,7 +122,7 @@ class TwitterCard(SocialPreviewBase):
         parser: str = "html.parser",
     ):
         super().__init__(url, properties, timeout, headers, content, parser)
-        preview = parse_twitter_card(self._soup, self.url)
+        preview = parse_twitter_card(self._soup, self.url, properties)
         self.merge(preview)
 
 
@@ -125,7 +141,7 @@ class Schema(SocialPreviewBase):
         parser: str = "html.parser",
     ):
         super().__init__(url, properties, timeout, headers, content, parser)
-        preview = parse_schema(self._soup, self.url)
+        preview = parse_schema(self._soup, self.url, properties)
         self.merge(preview)
 
 

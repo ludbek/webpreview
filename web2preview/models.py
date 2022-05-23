@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Dict, Optional
 
 
 class WebPreview:
@@ -12,56 +12,20 @@ class WebPreview:
         image: Optional[str] = None,
         **properties: str,
     ) -> None:
-        self._props: Dict[str, str] = {**properties}
-        if url:
-            self.url = url
-        if title:
-            self.title = title
-        if description:
-            self.description = description
-        if image:
-            self.image = image
-
-    @property
-    def url(self) -> Optional[str]:
-        return self._props.get("url")
-
-    @property
-    def title(self) -> Optional[str]:
-        return self._props.get("title")
-
-    @property
-    def description(self) -> Optional[str]:
-        return self._props.get("description")
-
-    @property
-    def image(self) -> Optional[str]:
-        return self._props.get("image")
-
-    @url.setter
-    def url(self, value: Optional[str]) -> None:
-        self._props["url"] = value
-
-    @title.setter
-    def title(self, value: Optional[str]) -> None:
-        self._props["title"] = value
-
-    @description.setter
-    def description(self, value: Optional[str]) -> None:
-        self._props["description"] = value
-
-    @image.setter
-    def image(self, value: Optional[str]) -> None:
-        self._props["image"] = value
-
-    def __getattr__(self, __name: str) -> Any:
-        return self._props.get(__name)
+        self.url = url
+        self.title = title
+        self.description = description
+        self.image = image
+        self.extend(**properties)
 
     def __getitem__(self, __name: str) -> Optional[str]:
-        return self._props.get(__name)
+        return self.__dict__.get(__name)
 
     def __setitem__(self, __name: str, __value: str) -> None:
-        self._props[__name] = __value
+        self.__dict__[__name] = __value
+
+    def __contains__(self, __name: str) -> bool:
+        return __name in self.__dict__
 
     def is_complete(self) -> bool:
         """Check that preview contains title, description, and image."""
@@ -70,28 +34,41 @@ class WebPreview:
     def extend(self, **properties: str) -> None:
         """Extend preview with new values. No overriding."""
         for k, v in properties.items():
-            if k not in self._props:
-                self._props[k] = v
+            if k not in self.__dict__:
+                self.__dict__[k] = v
 
     def merge(self, other: "WebPreview") -> None:
         """Merge values from other preview. No overriding."""
         self.__ior__(other)
 
+    def to_dict(self, exclude_empty: bool = False, exclude_none: bool = True) -> Dict[str, str]:
+        result = {}
+        for k, v in self.__dict__.items():
+            if k == "_soup":
+                continue
+            if v is None and exclude_none:
+                continue
+            if not v and exclude_empty:
+                continue
+            result[k] = v
+        return result
+
     def __or__(self, other: "WebPreview") -> "WebPreview":
-        props = {**other._props, **self._props}
+        props = {**other.to_dict(), **self.to_dict()}
         merged = WebPreview(**props)
         return merged
 
     def __ior__(self, other: "WebPreview") -> "WebPreview":
-        self._props = {**other._props, **self._props}
+        d = {**other.to_dict(), **self.to_dict()}
+        self.__dict__.update(d)
         return self
 
     def __repr__(self) -> str:
-        arguments = ", ".join([f'{k}="{v}"' for k, v in self._props.items() if v])
+        arguments = ", ".join([f'{k}="{v}"' for k, v in self.to_dict().items()])
         return f"WebPreview({arguments})"
 
     def __str__(self) -> str:
         return self.__repr__()
 
     def __bool__(self) -> bool:
-        return bool(self._props)
+        return any(self.__dict__.values())
