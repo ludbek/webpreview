@@ -1,0 +1,38 @@
+name: test
+
+on: [push, pull_request]
+
+jobs:
+
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.8, 3.9, 3.10]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: ./.github/actions/setup
+      - name: Tests
+        run: |
+          # Run tests
+          poetry run pytest
+
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - uses: ./.github/actions/setup
+      - name: Coverage
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        run: |
+          # Run tests
+          poetry run pytest --cov --cov-report=xml
+          # Send results to codecov
+          bash <(curl -s https://codecov.io/bash)

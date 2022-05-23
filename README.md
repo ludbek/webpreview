@@ -4,6 +4,13 @@ For a given URL `web2preview` extracts its **title**, **description**, and **ima
 [Open Graph](http://ogp.me/), [Twitter Card](https://dev.twitter.com/cards/overview), or
 [Schema](http://schema.org/) meta tags, or, as an alternative, parses it as a generic webpage.
 
+<p>
+    <a href="https://pypi.org/project/web2preview/"><img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/web2preview"></a>
+    <a href="https://pypi.org/project/web2preview/"><img alt="PyPI" src="https://img.shields.io/pypi/v/web2preview?logo=pypi&color=blue"></a>
+    <a href="https://github.com/vduseev/web2preview/actions?query=workflow%3Atests"><img alt="Build status" src="https://img.shields.io/github/workflow/status/vduseev/web2preview/docs?label=docs&logo=github"></a>
+    <a href="https://codecov.io/gh/vduseev/web2preview"><img alt="Code coverage report" src="https://img.shields.io/codecov/c/github/vduseev/web2preview?logo=codecov"></a>
+</p>
+
 This is a **fork** of an excellent [webpreview] library and it maintains **complete and absolute**
 compatibility with the original while fixing several bugs, enhancing parsing, and adding a new
 convenient APIs.
@@ -104,3 +111,18 @@ image: https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Enrico_Fermi_19
 *Note*: built docker image weighs around 210MB.
 
 [webpreview]: https://github.com/ludbek/webpreview
+
+## Testing
+
+In order to launch the tests, first, the web content must be exposed through the docker based web service:
+
+```shell
+# Launch the test environment
+docker run --rm -v "$(pwd)/tests:/usr/share/nginx/html:ro" -p "8000:80" nginx
+
+# Execute the tests
+poetry run pytest web2preview
+
+# OR execute until the first failed test
+poetry run pytest web2preview -x
+```
