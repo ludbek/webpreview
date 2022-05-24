@@ -1,9 +1,18 @@
 name: test
 
-on: [push, pull_request]
+on:
+  # Pull request trigger works only for PRs into main branch
+  pull_request:
+    branches:
+      - main
+  push:
+    # Push only works for tags.
+    # Will be executed on push or successful merge into main.
+    tags:
+      - "v*"
+  workflow_dispatch:
 
 jobs:
-
   tests:
     runs-on: ubuntu-latest
     strategy:
