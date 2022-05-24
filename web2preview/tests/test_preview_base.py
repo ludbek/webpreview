@@ -35,7 +35,9 @@ def test_properties_is_added_to_instance(generic_preview_empty):
     """
     PreviewBase: Test if passed "properties" are added to the instance.
     """
-    apreview = PreviewBase("http://localhost:8000/", ["title", "author"], content=generic_preview_empty)
+    apreview = PreviewBase(
+        "http://localhost:8000/", ["title", "author"], content=generic_preview_empty
+    )
     assert apreview.properties == ["title", "author"]
 
 
