@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "web2preview"
-version = "1.1.0"
+version = "1.1.1"
 description = "Extracts OpenGraph, TwitterCard and Schema properties from a webpage."
 authors = ["vduseev <vagiz@duseev.com>"]
 maintainers = ["vduseev <vagiz@duseev.com>"]
