@@ -2,10 +2,14 @@ from argparse import ArgumentParser
 
 from .excepts import *
 from .previews import *
+from .version import __version__
 
 
 def main() -> None:
-    parser = ArgumentParser("web2preview")
+    parser = ArgumentParser(
+        prog="web2preview",
+        description=f"v{__version__} Extracts OpenGraph, TwitterCard and Schema properties from a webpage.",
+    )
     parser.add_argument("url", type=str, help="URL to parse")
     parser.add_argument(
         "--timeout", "-t", type=int, help="Timeout in seconds when requestion URL", default=30
@@ -13,6 +17,7 @@ def main() -> None:
     parser.add_argument(
         "--absolute-url", "-a", help="Convert returned urls to absolute", action="store_true"
     )
+    parser.add_argument("--version", "-V", action="version", version=f"%(prog)s {__version__}")
     args = parser.parse_args()
 
     preview = web2preview(

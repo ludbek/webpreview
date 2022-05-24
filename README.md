@@ -7,7 +7,7 @@ For a given URL `web2preview` extracts its **title**, **description**, and **ima
 <p>
     <a href="https://pypi.org/project/web2preview/"><img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/web2preview"></a>
     <a href="https://pypi.org/project/web2preview/"><img alt="PyPI" src="https://img.shields.io/pypi/v/web2preview?logo=pypi&color=blue"></a>
-    <a href="https://github.com/vduseev/web2preview/actions?query=workflow%3Atests"><img alt="Build status" src="https://img.shields.io/github/workflow/status/vduseev/web2preview/tests?label=build&logo=github"></a>
+    <a href="https://github.com/vduseev/web2preview/actions?query=workflow%3Atest"><img alt="Build status" src="https://img.shields.io/github/workflow/status/vduseev/web2preview/test?label=build&logo=github"></a>
     <a href="https://codecov.io/gh/vduseev/web2preview"><img alt="Code coverage report" src="https://img.shields.io/codecov/c/github/vduseev/web2preview?logo=codecov"></a>
 </p>
 

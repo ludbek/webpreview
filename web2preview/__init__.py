@@ -30,6 +30,9 @@ from .previews import (
     web_preview,
 )
 
+from .version import __version__
+
+
 __all__ = [
     # New API
     "extract_title",
@@ -57,4 +60,6 @@ __all__ = [
     "TwitterCard",
     "Schema",
     "web_preview",
+    # Version
+    "__version__",
 ]
