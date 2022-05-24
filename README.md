@@ -114,12 +114,7 @@ image: https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Enrico_Fermi_19
 
 ## Testing
 
-In order to launch the tests, first, the web content must be exposed through the docker based web service:
-
 ```shell
-# Launch the test environment
-docker run --rm -v "$(pwd)/tests:/usr/share/nginx/html:ro" -p "8000:80" nginx
-
 # Execute the tests
 poetry run pytest web2preview
 

@@ -1,6 +1,7 @@
 import pytest
 
 from web2preview import *
+from .test_fixtures import *
 
 
 def test_it_complains_url_absence():
@@ -11,12 +12,12 @@ def test_it_complains_url_absence():
         PreviewBase()
 
 
-def test_instance_gets_valid_url():
+def test_instance_gets_valid_url(generic_preview_empty):
     """
     PreviewBase: Test instance gets the valid url being passed.
     """
     aurl = "http://localhost:8000/"
-    apreview = PreviewBase(aurl, properties=["title"], timeout=1)
+    apreview = PreviewBase(aurl, properties=["title"], timeout=1, content=generic_preview_empty)
     assert apreview.url == aurl
 
 
@@ -30,11 +31,11 @@ def test_url_without_schema_gets_http_appended():
     assert apreview2.url == "http://" + aurl2
 
 
-def test_properties_is_added_to_instance():
+def test_properties_is_added_to_instance(generic_preview_empty):
     """
     PreviewBase: Test if passed "properties" are added to the instance.
     """
-    apreview = PreviewBase("http://localhost:8000/", ["title", "author"])
+    apreview = PreviewBase("http://localhost:8000/", ["title", "author"], content=generic_preview_empty)
     assert apreview.properties == ["title", "author"]
 
 
@@ -50,14 +51,14 @@ def test_url_exists():
     """
     PreviewBase: Test if URL exists.
     """
-    with pytest.raises(URLNotFound):
+    with pytest.raises(URLUnreachable):
         PreviewBase("http://localhost:8000/thisdoesnotexists7", timeout=1)
 
 
-def test_complains_about_empty_property_list():
+def test_complains_about_empty_property_list(generic_preview_empty):
     """
     PreviewBase complains about empty property list.
     """
     with pytest.raises(EmptyProperties):
-        PreviewBase("http://localhost:8000")
-        PreviewBase("http://localhost:8000", [])
+        PreviewBase("http://localhost:8000", content=generic_preview_empty)
+        PreviewBase("http://localhost:8000", [], content=generic_preview_empty)
