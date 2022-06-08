@@ -1,4 +1,5 @@
 import re
+import unicodedata
 from urllib.parse import urlparse, urlunparse
 from typing import Dict, List, Optional, Tuple
 
@@ -70,6 +71,24 @@ def extract_image(soup: BeautifulSoup) -> Optional[str]:
             return first_image["src"]
 
     return None
+
+
+def sanitize(value: str) -> str:
+    """Sanitize given string.
+
+    See:
+    https://docs.python.org/3/library/unicodedata.html#unicodedata.normalize
+    """
+    # Do not process empty strings or None
+    if not value:
+        return value
+
+    # First, remove all newline characters.
+    v = value.replace("\n", " ").replace("\r", " ").replace("\t", " ").strip()
+    # Now, normalize unicode symbols
+    v = unicodedata.normalize("NFKD", v)
+
+    return v
 
 
 def extract_meta_attributes(
@@ -206,8 +225,8 @@ def initialize(
 
 
 def parse_generic(soup: BeautifulSoup, url: str, absolute_url: bool = False) -> WebPreview:
-    title = extract_title(soup)
-    description = extract_description(soup)
+    title = sanitize(extract_title(soup))
+    description = sanitize(extract_description(soup))
     image = extract_image(soup)
 
     if absolute_url and image:
