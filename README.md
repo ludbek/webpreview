@@ -121,3 +121,25 @@ poetry run pytest web2preview
 # OR execute until the first failed test
 poetry run pytest web2preview -x
 ```
+
+## Setting up development environment
+
+```shell
+# Install a correct minimal supported version of python
+pyenv install 3.7.13
+
+# Create a virtual environment
+# By default, the project already contains a .python-version file that points
+# to 3.7.13.
+python -m venv .venv
+
+# Install dependencies
+# Poetry will automatically install them into the local .venv
+poetry install
+
+# If you have errors likes this:
+ERROR: Can not execute `setup.py` since setuptools is not available in the build environment.
+
+# Then do this:
+.venv/bin/pip install --upgrade setuptools
+```
