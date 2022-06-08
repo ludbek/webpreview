@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "web2preview"
-version = "1.1.1"
+version = "1.1.2"
 description = "Extracts OpenGraph, TwitterCard and Schema properties from a webpage."
 authors = ["vduseev <vagiz@duseev.com>"]
 maintainers = ["vduseev <vagiz@duseev.com>"]
@@ -23,7 +23,7 @@ tox = "^3.25.0"
 pytest-cov = "^3.0.0"
 mypy = "^0.950"
 flake8 = "^4.0.1"
-pytest-flake8 = "^1.1.1"
+pytest-flake8 = "^1.1.2"
 pytest-black = "^0.3.12"
 flake8-import-order = "^0.18.1"
 pytest-mypy = "^0.9.1"
