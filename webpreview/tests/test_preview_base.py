@@ -1,6 +1,6 @@
 import pytest
 
-from web2preview import *
+from webpreview import *
 from .test_fixtures import *
 
 

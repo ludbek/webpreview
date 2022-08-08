@@ -6,7 +6,7 @@ Compatibility layer with original webpreview library.
 from .excepts import *
 from .parsers import *
 from .models import WebPreview
-from .previews import web2preview
+from .previews import webpreview
 
 
 class PreviewBase(WebPreview):
@@ -91,6 +91,19 @@ class SocialPreviewBase(PreviewBase):
 class OpenGraph(SocialPreviewBase):
     """
     Gets OpenGraph meta properties of a webpage.
+
+    Example:
+        >>> from webpreview import OpenGraph
+        >>> # pass a URL and a list of meta properties
+        >>> og = OpenGraph("http://aurl.com", ["og:title", "article:published_time", "og:price:amount"])
+        >>> # OpenGraph dynamically assigns corresponding properties to its instance. As you will see it excludes `og:` from the supplied properties.
+        >>> og.title
+        "a title"
+        >>> og.published_time
+        "2013-09-17T05:59:00+01:00"
+        >>> # It converts `:` in a property into `_`.
+        >>> og.price_amount
+        "15.00"
     """
 
     def __init__(
@@ -110,6 +123,12 @@ class OpenGraph(SocialPreviewBase):
 class TwitterCard(SocialPreviewBase):
     """
     Gets TwitterCard meta properties of a webpage.
+
+    Example:
+        >>> from webpreview import TwitterCard
+        >>> tc = TwitterCard("aurl.com", ["twitter:title", "twitter:image"])
+        >>> tc.title
+        >>> tc.image
     """
 
     def __init__(
@@ -129,6 +148,13 @@ class TwitterCard(SocialPreviewBase):
 class Schema(SocialPreviewBase):
     """
     Gets Schema meta properties from a website.
+
+    Example:
+        >>> from webpreview import Schema
+        >>> aschema = Schema("aurl.com", ["name", "camelCaseProperty"]
+        >>> aschema.name
+        >>> # It makes Camel Case properties available as Snake Case.
+        >>> aschema.camel_case_property
     """
 
     def __init__(
@@ -156,9 +182,9 @@ def web_preview(
     """Extract title, description and image from OpenGraph or TwitterCard or Schema or GenericPreview.
 
     This function is maintained for compatibility purposes with ``webpreview`` library and is simply
-    a wrapper around the newer ``web2preview`` function.
+    a wrapper around the newer ``webpreview`` function.
     For direct and convenient access to the parsing results through the ``WebPreview`` object
-    use the newer ``web2preview`` function.
+    use the newer ``webpreview`` function.
 
     Args:
         url (str): URL of the page. If content is supplied, the URL will not be
@@ -178,5 +204,5 @@ def web_preview(
         Tuple of 3 strings: title, description, image all of which can be None.
     """
 
-    preview = web2preview(url, timeout, headers, content, None, None, parser, absolute_image_url)
+    preview = webpreview(url, timeout, headers, content, None, None, parser, absolute_image_url)
     return preview.title, preview.description, preview.image

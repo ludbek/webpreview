@@ -9,5 +9,5 @@ RUN set -eux; \
 
 COPY . .
 
-ENTRYPOINT [ "poetry", "run", "web2preview" ]
+ENTRYPOINT [ "poetry", "run", "webpreview" ]
 CMD [ "example.com" ]

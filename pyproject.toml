@@ -1,18 +1,18 @@
 [tool.poetry]
-name = "web2preview"
-version = "1.1.3"
+name = "webpreview"
+version = "1.6.0"
 description = "Extracts OpenGraph, TwitterCard and Schema properties from a webpage."
-authors = ["vduseev <vagiz@duseev.com>"]
-maintainers = ["vduseev <vagiz@duseev.com>"]
+authors = ["ludbek <sth.srn@gmail.com>", "vduseev <vagiz@duseev.com>"]
+maintainers = ["vduseev <vagiz@duseev.com>", "ludbek <sth.srn@gmail.com>"]
 license = "MIT"
 keywords = ["preview", "webpage", "opengraph", "twittercard", "schema"]
 readme = "README.md"
-homepage = "https://github.com/vduseev/web2preview"
-repository = "https://github.com/vduseev/web2preview"
-documentation = "https://github.com/vduseev/web2preview"
+homepage = "https://github.com/ludbek/webpreview"
+repository = "https://github.com/ludbek/webpreview"
+documentation = "https://github.com/ludbek/webpreview"
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = ">=3.6.2,<4.0"
 requests = "^2.0"
 beautifulsoup4 = "^4.0"
 
@@ -29,7 +29,7 @@ pytest-mypy = "^0.9"
 bump2version = "^1.0"
 
 [tool.poetry.scripts]
-web2preview = "web2preview.cli:main"
+webpreview = "webpreview.cli:main"
 
 [build-system]
 build-backend = "poetry.core.masonry.api"

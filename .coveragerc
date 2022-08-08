@@ -1,10 +1,10 @@
 [run]
 branch = True
-source = web2preview
+source = webpreview
 
 omit =
     # Omit test files
-    web2preview/tests/*
+    webpreview/tests/*
 
 [report]
 exclude_lines =

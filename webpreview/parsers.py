@@ -261,7 +261,7 @@ def parse_schema(
     return result
 
 
-def web2preview(
+def webpreview(
     url: str,
     timeout: Optional[str] = None,
     headers: Optional[Dict[str, str]] = None,

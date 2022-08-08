@@ -1,47 +1,37 @@
-# web2preview
+# webpreview
 
-For a given URL `web2preview` extracts its **title**, **description**, and **image url** using
+For a given URL, `webpreview` extracts its **title**, **description**, and **image url** using
 [Open Graph](http://ogp.me/), [Twitter Card](https://dev.twitter.com/cards/overview), or
 [Schema](http://schema.org/) meta tags, or, as an alternative, parses it as a generic webpage.
 
 <p>
-    <a href="https://pypi.org/project/web2preview/"><img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/web2preview"></a>
-    <a href="https://pypi.org/project/web2preview/"><img alt="PyPI" src="https://img.shields.io/pypi/v/web2preview?logo=pypi&color=blue"></a>
-    <a href="https://github.com/vduseev/web2preview/actions?query=workflow%3Atest"><img alt="Build status" src="https://img.shields.io/github/workflow/status/vduseev/web2preview/test?label=build&logo=github"></a>
-    <a href="https://codecov.io/gh/vduseev/web2preview"><img alt="Code coverage report" src="https://img.shields.io/codecov/c/github/vduseev/web2preview?logo=codecov"></a>
+    <a href="https://pypi.org/project/webpreview/"><img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/webpreview"></a>
+    <a href="https://pypi.org/project/webpreview/"><img alt="PyPI" src="https://img.shields.io/pypi/v/webpreview?logo=pypi&color=blue"></a>
+    <a href="https://github.com/ludbek/webpreview/actions?query=workflow%3Atest"><img alt="Build status" src="https://img.shields.io/github/workflow/status/ludbek/webpreview/test?label=build&logo=github"></a>
+    <a href="https://codecov.io/gh/ludbek/webpreview"><img alt="Code coverage report" src="https://img.shields.io/codecov/c/github/ludbek/webpreview?logo=codecov"></a>
 </p>
 
-This is a **fork** of an excellent [webpreview] library and it maintains **complete and absolute**
-compatibility with the original while fixing several bugs, enhancing parsing, and adding a new
-convenient APIs.
-
-*Main differences between `web2preview` and `webpreview`*:
-
-* Enhanced parsing for generic web pages
-* No unnecessary `GET` request is ever made if `content` of the page is supplied
-* Complete fallback mechanism which continues to parse until all methods are exhausted
-* Python Typings are added across the entire library (**better syntax highlighting**)
-* New dict-like `WebPreview` result object makes it easier to read parsing results
-* Command-line utility to extract title, description, and image from URL
 
 ## Installation
 
 ```shell
-pip install web2preview
+pip install webpreview
 ```
 
 ## Usage
 
-Use the generic `web2preview` method to parse the page independent of its nature.
-It tries to extract the values from Open Graph properties, then it falls back to
-Twitter Card format, then Schema. If none of them can extract all three of the title,
-description, and preview image, then webpage's content is parsed using a generic
-extractor.
+Use the generic `webpreview` method (added in *v1.7.0*) to parse the page independent of its nature.
+This method fetches a page and tries to extracts a *title, description, and a preview image* from
+the page.
+
+It first attempts to parse the values from **Open Graph** properties, then it falls back to
+**Twitter Card** format, and then to **Schema**. If none of these methods succeed in extracting all
+three properties, then the web page's content is parsed using a generic HTML parser.
 
 ```python
->>> from web2preview import web2preview
+>>> from webpreview import webpreview
 
->>> p = web2preview("https://en.wikipedia.org/wiki/Enrico_Fermi")
+>>> p = webpreview("https://en.wikipedia.org/wiki/Enrico_Fermi")
 >>> p.title
 'Enrico Fermi - Wikipedia'
 >>> p.description
@@ -71,38 +61,65 @@ True
 </html>
 """
 
-# This function call won't make any external calls,
+# The the function's invocation won't make any external calls,
 # only relying on the supplied content, unlike the example above
->>> web2preview("aa.com", content=content)
+>>> webpreview("aa.com", content=content)
 WebPreview(url="http://aa.com", title="The Dormouse's story", description="A Mad Tea-Party story")
 ```
 
 ### Using the command line
 
-When `web2preview` is installed via `pip` the accompanying command-line tool is intalled alongside.
+When `webpreview` is installed via `pip`, then the accompanying command-line tool is
+installed alongside.
 
 ```shell
-$ web2preview https://en.wikipedia.org/wiki/Enrico_Fermi
+$ webpreview https://en.wikipedia.org/wiki/Enrico_Fermi
 title: Enrico Fermi - Wikipedia
 description: Italian-American physicist (1901–1954)
 image: https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Enrico_Fermi_1943-49.jpg/1200px-Enrico_Fermi_1943-49.jpg
 
-$ web2preview https://github.com/ --absolute-url
+$ webpreview https://github.com/ --absolute-url
 title: GitHub: Where the world builds software
 description: GitHub is where over 83 million developers shape the future of software, together.
 image: https://github.githubassets.com/images/modules/site/social-cards/github-social.png
 ```
 
-*Note*: For the Original [webpreview] API please check the [official docs][webpreview].
+### Using compatibility API
+
+Before *v1.7.0* the package mainly exposed a different set of the API methods.
+All of them are supported and may continue to be used.
+
+```python
+# WARNING:
+# The API below is left for BACKWARD COMPATIBILITY ONLY.
+
+from webpreview import web_preview
+title, description, image = web_preview("aurl.com")
+
+# specifing timeout which gets passed to requests.get()
+title, description, image = web_preview("a_slow_url.com", timeout=1000)
+
+# passing headers
+headers = {'User-Agent': 'Mozilla/5.0'}
+title, description, image = web_preview("a_slow_url.com", headers=headers)
+
+# pass html content thus avoiding making http call again to fetch content.
+content = """<html><head><title>Dummy HTML</title></head></html>"""
+title, description, image = web_preview("aurl.com", content=content)
+
+# specifing the parser
+# by default webpreview uses 'html.parser'
+title, description, image = web_preview("aurl.com", content=content, parser='lxml')
+```
 
 ## Run with Docker
 
 The docker image can be built and ran similarly to the command line.
-The default entry point is the `web2preview` command-line function.
+The default entry point is the `webpreview` command-line function.
 
 ```shell
-$ docker build -t web2preview .
-$ docker run -it --rm web2preview "https://en.m.wikipedia.org/wiki/Enrico_Fermi"
+$ docker build -t webpreview .
+$ docker run -it --rm webpreview "https://en.m.wikipedia.org/wiki/Enrico_Fermi"
 title: Enrico Fermi - Wikipedia
 description: Enrico Fermi (Italian: [enˈriːko ˈfermi]; 29 September 1901 – 28 November 1954) was an Italian (later naturalized American) physicist and the creator of the world's first nuclear reactor, the Chicago Pile-1. He has been called the "architect of the nuclear age"[1] and the "architect of the atomic bomb".
 image: https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Enrico_Fermi_1943-49.jpg/1200px-Enrico_Fermi_1943-49.jpg
@@ -110,16 +127,14 @@ image: https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Enrico_Fermi_19
 
 *Note*: built docker image weighs around 210MB.
 
-[webpreview]: https://github.com/ludbek/webpreview
-
 ## Testing
 
 ```shell
 # Execute the tests
-poetry run pytest web2preview
+poetry run pytest webpreview
 
 # OR execute until the first failed test
-poetry run pytest web2preview -x
+poetry run pytest webpreview -x
 ```
 
 ## Setting up development environment

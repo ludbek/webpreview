@@ -10,7 +10,7 @@ from .parsers import (
     parse_open_graph,
     parse_twitter_card,
     parse_schema,
-    web2preview,
+    webpreview,
 )
 from .excepts import (
     WebpreviewException,
@@ -46,7 +46,7 @@ __all__ = [
     "parse_open_graph",
     "parse_twitter_card",
     "parse_schema",
-    "web2preview",
+    "webpreview",
     # Exceptions
     "WebpreviewException",
     "EmptyURL",

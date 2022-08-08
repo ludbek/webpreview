@@ -7,7 +7,7 @@ from .version import __version__
 
 def main() -> None:
     parser = ArgumentParser(
-        prog="web2preview",
+        prog="webpreview",
         description=f"v{__version__} Extracts OpenGraph, TwitterCard and Schema properties from a webpage.",
     )
     parser.add_argument("url", type=str, help="URL to parse")
@@ -20,7 +20,7 @@ def main() -> None:
     parser.add_argument("--version", "-V", action="version", version=f"%(prog)s {__version__}")
     args = parser.parse_args()
 
-    preview = web2preview(
+    preview = webpreview(
         url=args.url,
         timeout=args.timeout,
         absolute_url=args.absolute_url,
