@@ -1,0 +1,39 @@
+[tool.poetry]
+name = "webpreview"
+version = "1.7.0"
+description = "Extracts OpenGraph, TwitterCard and Schema properties from a webpage."
+authors = ["ludbek <sth.srn@gmail.com>", "vduseev <vagiz@duseev.com>"]
+maintainers = ["vduseev <vagiz@duseev.com>", "ludbek <sth.srn@gmail.com>"]
+license = "MIT"
+keywords = ["preview", "webpage", "opengraph", "twittercard", "schema"]
+readme = "README.md"
+homepage = "https://github.com/ludbek/webpreview"
+repository = "https://github.com/ludbek/webpreview"
+documentation = "https://github.com/ludbek/webpreview"
+
+[tool.poetry.dependencies]
+python = ">=3.6.2,<4.0"
+requests = "^2.0"
+beautifulsoup4 = "^4.0"
+
+[tool.poetry.dev-dependencies]
+black = "^22.0"
+pytest = "^7.0"
+pytest-cov = "^3.0"
+mypy = "^0.950"
+flake8 = "^4.0"
+pytest-flake8 = "^1.0"
+pytest-black = "^0.3"
+flake8-import-order = "^0.18"
+pytest-mypy = "^0.9"
+bump2version = "^1.0"
+
+[tool.poetry.scripts]
+webpreview = "webpreview.cli:main"
+
+[build-system]
+build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core>=1.0.0", "setuptools>=62"]
+
+[tool.black]
+line-length = 100

@@ -1,0 +1,48 @@
+name: test
+
+on:
+  # Pull request trigger works only for PRs into main branch
+  pull_request:
+    branches:
+      - main
+  push:
+    # Push only works for tags.
+    # Will be executed on push or successful merge into main.
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  tests:
+    strategy:
+      matrix:
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: ./.github/actions/setup
+      - name: Tests
+        run: |
+          # Run tests
+          poetry run pytest
+
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+        with:
+          python-version: "3.9"
+      - uses: ./.github/actions/setup
+      - name: Coverage
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        run: |
+          # Run tests
+          poetry run pytest --cov --cov-report=xml
+          # Send results to codecov
+          bash <(curl -s https://codecov.io/bash)

@@ -1,88 +1,159 @@
-[![Build Status](https://travis-ci.org/ludbek/webpreview.svg?branch=master)](https://travis-ci.org/ludbek/webpreview)
+# webpreview
 
-# About
-Webpreview helps preview a webpage. It extracts [Open Graph](http://ogp.me/), [Twitter Card](https://dev.twitter.com/cards/overview) and [Schema](http://schema.org/) meta tags. Given a URL of a page, it extracts title, thumbnail, description, etc as per request.
+For a given URL, `webpreview` extracts its **title**, **description**, and **image url** using
+[Open Graph](http://ogp.me/), [Twitter Card](https://dev.twitter.com/cards/overview), or
+[Schema](http://schema.org/) meta tags, or, as an alternative, parses it as a generic webpage.
 
-#Installation
+<p>
+    <a href="https://pypi.org/project/webpreview/"><img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/webpreview"></a>
+    <a href="https://pypi.org/project/webpreview/"><img alt="PyPI" src="https://img.shields.io/pypi/v/webpreview?logo=pypi&color=blue"></a>
+    <a href="https://github.com/ludbek/webpreview/actions?query=workflow%3Atest"><img alt="Build status" src="https://img.shields.io/github/workflow/status/ludbek/webpreview/test?label=build&logo=github"></a>
+    <a href="https://codecov.io/gh/ludbek/webpreview"><img alt="Code coverage report" src="https://img.shields.io/codecov/c/github/ludbek/webpreview?logo=codecov"></a>
+</p>
 
-    $ pip install webpreview
 
-# Usage
-## Preview a Web Page
-API: `web_preview(url, timeout?, headers?, content?, absolute_image_url?, parser?)`
+## Installation
 
-Use `web_preview` for extracting title, description and thumbnail image. It tries to extract them from Open Graph properties, if not found it falls back to Twitter Card, and so on  till Schema.  If non works it tries to extract from the webpage's content.
+```shell
+pip install webpreview
+```
 
-    $ from webpreview import web_preview
-    $ title, description, image = web_preview("aurl.com")
+## Usage
 
-    # specifing timeout which gets passed to requests.get()
-    $ title, description, image = web_preview("a_slow_url.com", timeout=1000)
+Use the generic `webpreview` method (added in *v1.7.0*) to parse the page independent of its nature.
+This method fetches a page and tries to extracts a *title, description, and a preview image* from it.
 
-    # passing headers
-    $ headers = {'User-Agent': 'Mozilla/5.0'}
-    $ title, description, image = web_preview("a_slow_url.com", headers=headers)
+It first attempts to parse the values from **Open Graph** properties, then it falls back to
+**Twitter Card** format, and then to **Schema**. If none of these methods succeed in extracting all
+three properties, then the web page's content is parsed using a generic HTML parser.
 
-    # pass html content thus avoiding making http call again to fetch content.
-    $ content = """<html><head><title>Dummy HTML</title></head></html>"""
-    $ title, description, image = web_preview("aurl.com", content=content)
+```python
+>>> from webpreview import webpreview
 
-    # specifing the parser
-    # by default webpreview uses 'html.parser'
-    $ title, description, image = web_preview("aurl.com", content=content, parser='lxml')
+>>> p = webpreview("https://en.wikipedia.org/wiki/Enrico_Fermi")
+>>> p.title
+'Enrico Fermi - Wikipedia'
+>>> p.description
+'Italian-American physicist (1901–1954)'
+>>> p.image
+'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Enrico_Fermi_1943-49.jpg/1200px-Enrico_Fermi_1943-49.jpg'
 
-## Open Graph
-API: `OpenGraph(url, properties, timeout?, headers?, content?, parser?)`
+# Access the parsed fields both as attributes and items
+>>> p["url"] == p.url
+True
 
-`OpenGraph` extracts Open Graph meta properties. Consider following meta tags.
+# Check if all three of the title, description, and image are in the parsing result
+>>> p.is_complete()
+True
 
-    <!--doc snippet at aurl.com -->
-    <meta property="og:title" content="a title" />
-    <meta property="og:description" content="a description" />
-    <meta property="article:published_time" content="2013-09-17T05:59:00+01:00" />
-    <meta property="og:price:amount" content="15.00" />
+# Provide page content from somewhere else
+>>> content = """
+<html>
+    <head>
+        <title>The Dormouse's story</title>
+        <meta property="og:description" content="A Mad Tea-Party story" />
+    </head>
+    <body>
+        <p class="title"><b>The Dormouse's story</b></p>
+        <a href="http://example.com/elsie" class="sister" id="link1">Elsie</a>
+    </body>
+</html>
+"""
 
-Below is a snippet showing its usage.
+# The the function's invocation won't make any external calls,
+# only relying on the supplied content, unlike the example above
+>>> webpreview("aa.com", content=content)
+WebPreview(url="http://aa.com", title="The Dormouse's story", description="A Mad Tea-Party story")
+```
 
-    $ from webpreview import OpenGraph
-    
-    # pass a URL and a list of meta properties
-    $ og = OpenGraph("http://aurl.com", ["og:title", "article:published_time", "og:price:amount"])
-    
-    # OpenGraph dynamically assigns corresponding properties to its instance. As you will see it excludes `og:` from the supplied properties.
-    $ og.title
-    => "a title"
-    $ og.published_time
-    => "2013-09-17T05:59:00+01:00"
-	
-	# It converts `:` in a property into `_`.
-    $ og.price_amount
-    => "15.00"
+### Using the command line
 
-## Twitter Card
-API: `TwitterCard(url, properties, timeout?, headers?, content?, parser?)`
+When `webpreview` is installed via `pip`, then the accompanying command-line tool is
+installed alongside.
 
-`TwitterCard` extracts Twitter Card meta properties from the given webpage. Its usage is similar to `OpenGraph`.
+```shell
+$ webpreview https://en.wikipedia.org/wiki/Enrico_Fermi
+title: Enrico Fermi - Wikipedia
+description: Italian-American physicist (1901–1954)
+image: https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Enrico_Fermi_1943-49.jpg/1200px-Enrico_Fermi_1943-49.jpg
 
-    $ from webpreview import TwitterCard
-    $ tc = TwitterCard("aurl.com", ["twitter:title", "twitter:image"])
-    $ tc.title
-    $ tc.image
+$ webpreview https://github.com/ --absolute-url
+title: GitHub: Where the world builds software
+description: GitHub is where over 83 million developers shape the future of software, together.
+image: https://github.githubassets.com/images/modules/site/social-cards/github-social.png
+```
 
-## Schema
-API: `Schema(url, properties, timeout?, headers?, content?, parser?)`
+### Using compatibility API
 
-Webpreview supports Schema through the class `Schema`. Right now it extracts properties in meta tags only.
+Before *v1.7.0* the package mainly exposed a different set of the API methods.
+All of them are supported and may continue to be used.
 
-    $ from webpreview import Schema
-    $ aschema = Schema("aurl.com", ["name", "camelCaseProperty"]
-    $ aschema.name
-    # It makes Camel Case properties available as Snake Case.
-    $ aschema.camel_case_property
+```python
+# WARNING:
+# The API below is left for BACKWARD COMPATIBILITY ONLY.
+
+from webpreview import web_preview
+title, description, image = web_preview("aurl.com")
+
+# specifing timeout which gets passed to requests.get()
+title, description, image = web_preview("a_slow_url.com", timeout=1000)
+
+# passing headers
+headers = {'User-Agent': 'Mozilla/5.0'}
+title, description, image = web_preview("a_slow_url.com", headers=headers)
+
+# pass html content thus avoiding making http call again to fetch content.
+content = """<html><head><title>Dummy HTML</title></head></html>"""
+title, description, image = web_preview("aurl.com", content=content)
+
+# specifing the parser
+# by default webpreview uses 'html.parser'
+title, description, image = web_preview("aurl.com", content=content, parser='lxml')
+```
 
 ## Run with Docker
-    $ docker build -t webpreview .
-    $ docker run -it --rm --name webpreview webpreview python
 
-### Run your script
-    $ docker run -it --rm --name my-script -v "$PWD":/usr/src/myapp -w /usr/src/myapp webpreview python your-script.py
+The docker image can be built and ran similarly to the command line.
+The default entry point is the `webpreview` command-line function.
+
+```shell
+$ docker build -t webpreview .
+$ docker run -it --rm webpreview "https://en.m.wikipedia.org/wiki/Enrico_Fermi"
+title: Enrico Fermi - Wikipedia
+description: Enrico Fermi (Italian: [enˈriːko ˈfermi]; 29 September 1901 – 28 November 1954) was an Italian (later naturalized American) physicist and the creator of the world's first nuclear reactor, the Chicago Pile-1. He has been called the "architect of the nuclear age"[1] and the "architect of the atomic bomb".
+image: https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Enrico_Fermi_1943-49.jpg/1200px-Enrico_Fermi_1943-49.jpg
+```
+
+*Note*: built docker image weighs around 210MB.
+
+## Testing
+
+```shell
+# Execute the tests
+poetry run pytest webpreview
+
+# OR execute until the first failed test
+poetry run pytest webpreview -x
+```
+
+## Setting up development environment
+
+```shell
+# Install a correct minimal supported version of python
+pyenv install 3.7.13
+
+# Create a virtual environment
+# By default, the project already contains a .python-version file that points
+# to 3.7.13.
+python -m venv .venv
+
+# Install dependencies
+# Poetry will automatically install them into the local .venv
+poetry install
+
+# If you have errors likes this:
+ERROR: Can not execute `setup.py` since setuptools is not available in the build environment.
+
+# Then do this:
+.venv/bin/pip install --upgrade setuptools
+```

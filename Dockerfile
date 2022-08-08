@@ -1,10 +1,13 @@
-FROM python:3
+FROM python:slim
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
-COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+COPY pyproject.toml poetry.lock ./
+RUN set -eux; \
+    pip install poetry; \
+    poetry install --no-dev --no-root
 
 COPY . .
 
-CMD [ "python", "./setup.py" ]
+ENTRYPOINT [ "poetry", "run", "webpreview" ]
+CMD [ "example.com" ]
