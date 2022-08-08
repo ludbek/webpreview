@@ -21,8 +21,7 @@ pip install webpreview
 ## Usage
 
 Use the generic `webpreview` method (added in *v1.7.0*) to parse the page independent of its nature.
-This method fetches a page and tries to extracts a *title, description, and a preview image* from
-the page.
+This method fetches a page and tries to extracts a *title, description, and a preview image* from it.
 
 It first attempts to parse the values from **Open Graph** properties, then it falls back to
 **Twitter Card** format, and then to **Schema**. If none of these methods succeed in extracting all
