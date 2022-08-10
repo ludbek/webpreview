@@ -1,0 +1,36 @@
+name: Release webpreview
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  tests:
+    strategy:
+      matrix:
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: ./.github/actions/setup
+      - name: Tests
+        run: |
+          # Run tests
+          poetry run pytest
+
+  publish-npm:
+    needs: tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - run: |
+          poetry publish
+        env:
+          POETRY_PYPI_TOKEN_PYPI: ${{secrets.pypi_token}}
