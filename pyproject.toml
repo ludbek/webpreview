@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "webpreview"
-version = "1.7.1"
+version = "1.7.2"
 description = "Extracts OpenGraph, TwitterCard and Schema properties from a webpage."
 authors = ["ludbek <sth.srn@gmail.com>", "vduseev <vagiz@duseev.com>"]
 maintainers = ["vduseev <vagiz@duseev.com>", "ludbek <sth.srn@gmail.com>"]
