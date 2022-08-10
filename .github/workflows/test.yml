@@ -4,7 +4,7 @@ on:
   # Pull request trigger works only for PRs into main branch
   pull_request:
     branches:
-      - main
+      - master
   push:
     # Push only works for tags.
     # Will be executed on push or successful merge into main.
